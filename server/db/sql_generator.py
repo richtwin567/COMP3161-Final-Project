@@ -867,7 +867,7 @@ procedures.append(create_procedure("insert_recipe", """
                                        parameter(Direction.IN,
                                                  "new_cook_time", time()),
                                        parameter(
-                                           Direction.IN, "new_creation_date", datetime()),
+                                           Direction.IN, "new_creation_date", sql_datetime()),
                                        parameter(Direction.IN,
                                                  "new_culture", string()),
                                        parameter(
