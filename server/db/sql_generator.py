@@ -104,7 +104,7 @@ DELIMITER ;
 ##### TABLE RECORD MODFICATION QUERIES ######
 
 
-def insert(table_name, values):
+def insert_all(table_name, values):
     values = [", ".join([value if type(value) != "str" else quote_string(
         value) for value in value_list]) for value_list in values]
     values = "),\n\t(".join(values)
@@ -112,6 +112,35 @@ def insert(table_name, values):
 INSERT INTO {table_name} VALUES
     ({values});
 """
+
+def insert_one(table_name, value_list):
+    """Generate SQL insert statements based on the table name and values.
+
+    Args:
+        <string> table_name: The name of the database table
+        <list> values: The list of the values passed in
+
+    Returns:
+        <string> A formatted string with the insert statement
+    """
+    insert_value = ""
+
+    # Loop through all values except the last
+    for value in range(len(value_list)-1):
+        current_value = value_list[value]
+        if type(current_value) == str:
+            insert_value += f"{ quote_string(current_value) },"
+        else:
+            insert_value += f"{ current_value },"
+
+    # Format the last value in the list of values
+    if type(value_list[-1]) == str:
+        insert_value += f"{ quote_string(value_list[-1]) }"
+    else:
+        insert_value += f"{ value_list[-1] }"
+
+    return "INSERT INTO {0} VALUES ({1});".format(table_name, insert_value)
+
 
 ##### CUSTOM GENERATORS #####
 
@@ -180,21 +209,105 @@ def random_recipe_name():
     return " ".join([c_adjectives[0],random.choice(CONJUNCTIONS), c_adjectives[1],c_foods[0] ,random.choice(CONJUNCTIONS), c_foods[1]])
 
 
+# Functions to generate the insert statements
+
+
+def generate_recipe_data(no_entries, faker_obj):
+    """Creates the INSERT queries for the Recipe table
+
+    Args:
+        no_entries
+
+    Returns:
+        A list containing all of the insert statements
+    """
+    insert_statements = []
+    for value in range(no_entries):
+        pass
+
+
+def generate_user_data(no_entries, faker_obj):
+    """Creates the INSERT queries for the User table
+
+    Args:
+        <int> no_entries: The number of database entries to be created
+
+    Returns:
+        <list> A list containing all of the insert statements
+    """
+    insert_statements = []
+    for value in range(no_entries):
+
+        # Generate fake user data
+        user_id = value+1
+        name_lst = faker_obj.unique.name().split(' ')
+        username = "".join(name_lst)
+        first_name = name_lst[0]
+        last_name = name_lst[1]
+        password = faker_obj.password(length=12)
+
+        # Create the insert statement
+        value_lst = [user_id, username, first_name, last_name, password]
+        insert_statement = insert_one('user', value_lst)
+        insert_statements.append(insert_statement)
+
+    return insert_statements
+
+
+def generate_ingredients_data(no_entries, faker_obj):
+    """Creates the INSERT queries for the Ingredients table
+
+    Args:
+        <int> no_entries: The number of database entries to be created
+
+    Returns:
+        <list> A list containing all of the insert statements
+    """
+    pass
+
+
+def generate_allergies_data(no_entries, faker_obj):
+    """Creates the INSERT queries for the Ingredients table
+
+    Args:
+        <int> no_entries: The number of database entries to be created
+
+    Returns:
+         <list> A list containing all of the insert statements
+    """
+    pass
+
+# Functions to create the respective tables
+
+# Function to write to the file
+
+
+def write_sql(file_handler, statements):
+    """Writes SQL to file specified withthe file handler
+
+        Args:
+            <list> statements: The list of statements to be written to the file
+            file_handler: The object used for writing to the file
+
+        Returns:
+            None
+    """
+    for line in statements:
+        file_handler.write(f"{line}\n")
+
+
 ##### END CUSTOM GENERATORs #####
 
 ##### DB CREATION #####
 
-# open/ create the sql file
-fp = open("sophro_db.sql", "wt")
-
-
+file_handler = open("sophro_db.sql", "w")
 fake = Faker()
 
 # create db
 
-fp.write("CREATE DATABASE sophro;\n")
+create_db_stmt = "CREATE DATABASE sophro;\n"
 
-fp.write("USE sophro;\n\n")
+use_db_stmt = "USE sophro;\n\n"
 
 # build tables
 
@@ -279,6 +392,7 @@ tables.append(create_table("ingredient_allergy",
         foreign_key("ingredient_id","ingredient","ingredient_id")
     ]))
 
+
 # instruction table
 tables.append(create_table("instruction",
     [
@@ -291,6 +405,7 @@ tables.append(create_table("instruction",
         primary_key("instruction_id"),
         foreign_key("recipe_id","recipe","recipe_id")
     ]))
+
 
 # recipe_ingredient_measurement table
 tables.append(create_table("recipe_ingredient_measurement",
@@ -334,8 +449,8 @@ tables.append(create_table("planned_meal",
         foreign_key("plan_id","meal_plan","plan_id")
     ]))
 
-# user_allergy table
 
+# user_allergy table
 tables.append(create_table("user_allergy",
     [
         field("user_id",integer()),
@@ -347,16 +462,15 @@ tables.append(create_table("user_allergy",
         foreign_key("allergy_id","allergy","allergy_id")
     ]))
 
+
 # write all tables
 for table in tables:
-    fp.write(table)
+    file_handler.write(table)
 
-# create procedures
+##### END DB CREATION #####
 
-procedures = []
-
-# insert procedure
-
-# procedures.append(create_procedure("insert_recipe", [parameter(Direction.IN,)]))
-
-fp.close()
+if __name__ == "__main__":
+    f_handler = open("./db/test.sql", "w")
+    data = generate_user_data(50, fake)
+    for line in data:
+        f_handler.write(f"{line}\n")
