@@ -94,12 +94,32 @@ def create_procedure(procedure_name, query, parameters):
 
 
 def insert(table_name, values):
-    values = [", ".join([value if type(value) != "str" else quote_string(
-        value) for value in value_list]) for value_list in values]
-    return f"""
-    INSERT INTO {table_name} VALUES
-        ({"),\n\t(".join(values)});
+    """Generate SQL insert statements based on the table name and values.
+
+    Args:
+        <string> table_name: The name of the database table
+        <list> values: The list of the values passed in
+
+    Returns:
+        <string> A formatted string with the insert statement
     """
+    insert_value = ""
+
+    # Loop through all values except the last
+    for value in range(len(values)-1):
+        current_value = values[value]
+        if type(current_value) == str:
+            insert_value += f"{ quote_string(current_value) },"
+        else:
+            insert_value += f"{ current_value },"
+
+    # Format the last value in the list of values
+    if type(values[-1]) == str:
+        insert_value += f"{ quote_string(values[-1]) }"
+    else:
+        insert_value += f"{ values[-1] }"
+
+    return "INSERT INTO {0} VALUES ({1});".format(table_name, insert_value)
 
 ##### DB CREATION #####
 
@@ -140,6 +160,8 @@ ADJECTIVES = [
     "Crisp,"
     "Crunchy",
     "Gourmet"
+
+
 ]
 
 FOODS = [
@@ -162,9 +184,60 @@ FOODS = [
 ]
 
 # open/ create the sql file
-fp = open("sophro_db.sql", "wt")
 
 
-fake = Faker()
+def generate_recipe_data(no_entries, faker_obj):
+    """Creates the INSERT queries for the Recipe table
+
+    Args:
+        no_entries
+
+    Returns:
+        A list containing all of the insert statements
+    """
+    pass
 
 
+def generate_user_data(no_entries, faker_obj):
+    """Creates the INSERT queries for the User table
+
+    Args:
+        <int> no_entries: The number of database entries to be created
+
+    Returns:
+        <list> A list containing all of the insert statements
+    """
+    insert_lst = []
+
+
+def generate_ingredients_data(no_entries, faker_obj):
+    """Creates the INSERT queries for the Ingredients table
+
+    Args:
+        <int> no_entries: The number of database entries to be created
+
+    Returns:
+         <list> A list containing all of the insert statements
+    """
+    pass
+
+
+def generate_allergies_data(no_entries, faker_obj):
+    """Creates the INSERT queries for the Ingredients table
+
+    Args:
+        <int> no_entries: The number of database entries to be created
+
+    Returns:
+         <list> A list containing all of the insert statements
+    """
+    pass
+
+
+def main(faker_obj):
+    fp = open("sophro_db.sql", "wt")
+
+
+if __name__ == "__main__":
+    fake = Faker()
+    main(fake)
