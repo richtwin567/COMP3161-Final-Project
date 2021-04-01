@@ -5,34 +5,70 @@ import random
 
 #    HELPER FUNCTIONS   #
 class Direction():
+    """
+    Directions for parameter types in procedures
+    """
     IN = "IN"
     OUT = "OUT"
     INOUT = "INOUT"
 
 
 def quote_string(string):
+    """
+    Surrounds a string in single quotes
+    """
     return f"""'{string}'"""
 
 ###### TYPES ######
 
 
 def floating_point(p=2):
+    """
+    The float data type
+
+    Args:
+        p(int):
+            The precision. 0-24 defines a float while 25-53 defines a double.
+
+    Returns:
+        str: The float data type
+    """
+
     return f"FLOAT({p})"
 
 def integer():
+    """
+    The int data type
+    """
     return "INT"
 
 def string(max=255):
+    """
+    the varchar data type
+
+    Args:
+        max(int):
+            The maximum number of characters
+    """
     return f"VARCHAR({max})"
 
 def enum(values):
+    """
+    the enum data type
+    """
     values = [quote_string(value) for value in values]
     return f"""ENUM({", ".join(values)})"""
 
 def time():
+    """
+    The time data type
+    """
     return "TIME"
 
 def datetime():
+    """
+    the datetime data type
+    """
     return "DATETIME"
 
 
@@ -42,6 +78,17 @@ def datetime():
 ###### CONSTRAINTS  ######
 
 def primary_key(field_names):
+    """
+    Creates a primary key constraint on the given field_name(s).
+
+    Args:
+        field_names (str | list) :
+            The names of the fields that make up the primary key
+    
+    Return:
+        str: the primary key constraint
+    """
+
     if type(field_names) is list:
         return f"""PRIMARY KEY({", ".join(field_names)})"""
     elif type(field_names) is str:
@@ -51,10 +98,44 @@ def primary_key(field_names):
 
 
 def foreign_key(field_name, ref_table, ref_field, cascade_on_delete=True, cascade_on_update=True):
+    """
+    Creates a foreign key constraint
+
+    Args:
+        field_name(str):
+            The foreign key field name
+
+        ref_table(str):
+            The table the foreign key references
+
+        ref_field(str):
+            The name of the field in the ref_table to reference
+
+        cascade_on_delete(bool):
+            If true, on delete is set to cascade. If false on delete is set to restict
+
+        cascade_on_update(bool):
+            If true, on update is set to cascade. If false on update is set to restict
+    
+    Return:
+        str: The foreign key constraint
+    """
+
     return f"""FOREIGN KEY({field_name}) REFERENCES {ref_table}({ref_field}) ON DELETE {"CASCADE" if cascade_on_delete else "RESTRICT"} ON UPDATE {"CASCADE" if cascade_on_update else "RESTRICT"}"""
 
 
 def unique_key(field_names):
+    """
+    Create a unique key constraint on the given field_name(s)
+
+    Args:
+        field_names (str | list) :
+            The names of the fields that make up the unique key
+    
+    Return:
+        str: the unique key constraint
+    """
+
     if type(field_names) is list:
         return f"""UNIQUE KEY({", ".join(field_names)})"""
     elif type(field_names) is str:
@@ -66,28 +147,99 @@ def unique_key(field_names):
 
 
 def field(name, type, not_null=True, auto_increment=False):
+    """
+    Creates a table field
+
+    Args:
+        name(str):
+            The field name
+        
+        type(str):
+            The data type of the field
+
+        not_null(bool):
+            Whether the field can be null or not
+
+        auto_increment(bool):
+            whether the field auto increments
+    
+    Returns:
+        str: The field
+    """
+
     return f"""{name} {type}{" NOT NULL" if not_null else ""}{" AUTO_INCREMENT" if auto_increment else ""}"""
 
 
 def parameter(direction, name, type):
+    """
+    Creates a procedure parameter
+
+    Args:
+        direction(Direction):
+            The directionality of the parameter (IN, INOUT, OUT)
+
+        name(str):
+            The name of the parameter
+
+        type(str):
+            The type of the parameter
+
+    Returns:
+        str: The parameter
+    """
+
     return f"{direction} {name} {type}"
 
 
 ######  CREATE QUERIES   ######
 
 def create_table(table_name, fields, constraints):
+    """
+    Creates a table
+
+    Args:
+        table_name(str):
+            The name of the table
+
+        fields(list[str]):
+            A list of fields in the table
+
+        constraints(list[str]):
+            A list of constraints in the table
+
+    Returns:
+        str: The create table statement
+    """
+
     fields = ",\n\t".join(fields)
     constraints = ",\n\t".join(constraints)
     return f"""
 CREATE TABLE {table_name} (
-    {fields},
+    {fields}{"," if constraints else ""}
 
     {constraints}
 );
 """
 
 
-def create_procedure(procedure_name, query, parameters):
+def create_procedure(procedure_name, query, parameters=[]):
+    """
+    Creates a new procedure that executes the given query and taken the given parameters.
+
+    Args:
+        procedure_name(str):
+            The name of the procedure
+        
+        query(str):
+            The query the procedure should execute
+
+        parameters(list[str]):
+            The parameters the procedure takes
+        
+    Returns:
+        str: The create procedure statement
+    """
+
     return f"""
 DELIMITER //
 
@@ -105,6 +257,20 @@ DELIMITER ;
 
 
 def insert_all(table_name, values):
+    """
+    Creates a single statement to insert multiple records 
+
+    Args:
+        table_name(str):
+            The name of the table to insert into
+
+        values(list[list[str]]):
+            The list of value lists to insert
+    
+    Returns:
+        str: The insert statement
+    """
+
     values = [", ".join([value if type(value) != "str" else quote_string(
         value) for value in value_list]) for value_list in values]
     values = "),\n\t(".join(values)
