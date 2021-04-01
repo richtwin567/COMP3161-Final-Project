@@ -271,7 +271,7 @@ def insert_all(table_name, values):
         str: The insert statement
     """
 
-    values = [", ".join([value if type(value) != "str" else quote_string(
+    values = [", ".join([str(value) if not type(value) is str else quote_string(
         value) for value in value_list]) for value_list in values]
     values = "),\n\t(".join(values)
     return f"""
@@ -401,23 +401,23 @@ def generate_user_data(no_entries, faker_obj):
     Returns:
         <list> A list containing all of the insert statements
     """
-    insert_statements = []
+    value_lists = []
     for value in range(no_entries):
 
         # Generate fake user data
         user_id = value+1
-        name_lst = faker_obj.unique.name().split(' ')
-        username = "".join(name_lst)
-        first_name = name_lst[0]
-        last_name = name_lst[1]
+        username = faker_obj.unique.user_name()
+        first_name = faker_obj.unique.first_name()
+        last_name = faker_obj.unique.last_name()
         password = faker_obj.password(length=12)
 
-        # Create the insert statement
+        # Create the insert list
         value_lst = [user_id, username, first_name, last_name, password]
-        insert_statement = insert_one('user', value_lst)
-        insert_statements.append(insert_statement)
+        value_lists.append(value_lst)
+    
+    insert_statement = insert_all("user",value_lists)
 
-    return insert_statements
+    return insert_statement
 
 
 def generate_ingredients_data(no_entries, faker_obj):
@@ -462,18 +462,21 @@ def write_sql(file_handler, statements):
         file_handler.write(f"{line}\n")
 
 
-##### END CUSTOM GENERATORs #####
+##### END CUSTOM GENERATORS #####
 
 ##### DB CREATION #####
 
 file_handler = open("sophro_db.sql", "w")
-fake = Faker()
 
 # create db
 
-create_db_stmt = "CREATE DATABASE sophro;\n"
+db_name = "sophro"
 
-use_db_stmt = "USE sophro;\n\n"
+drop_stmt = f"DROP DATABASE IF EXISTS {db_name};\n"
+
+create_db_stmt = f"CREATE DATABASE {db_name};\n"
+
+use_db_stmt = f"USE {db_name};\n\n"
 
 # build tables
 
@@ -524,7 +527,8 @@ tables.append(create_table("user",
         field("password",string())
     ],
     [
-        primary_key("user_id")
+        primary_key("user_id"),
+        unique_key("username")
     ]))
 
 
@@ -629,14 +633,22 @@ tables.append(create_table("user_allergy",
     ]))
 
 
+file_handler.write(drop_stmt)
+
+file_handler.write(create_db_stmt)
+
+file_handler.write(use_db_stmt)
+
 # write all tables
 for table in tables:
     file_handler.write(table)
 
 ##### END DB CREATION #####
 
+##### DB INSERT #####
+
 if __name__ == "__main__":
-    f_handler = open("./db/test.sql", "w")
+    #f_handler = open("./db/test.sql", "w")
+    fake = Faker()
     data = generate_user_data(50, fake)
-    for line in data:
-        f_handler.write(f"{line}\n")
+    file_handler.write(data)
