@@ -1,5 +1,4 @@
 from faker import Faker
-from psycopg2 import connect
 import random
 
 
@@ -399,8 +398,9 @@ def generate_user_data(no_entries, faker_obj):
         <int> no_entries: The number of database entries to be created
 
     Returns:
-        <list> A list containing all of the insert statements
+        <string> A list containing the insert statement
     """
+    
     value_lists = []
     for value in range(no_entries):
 
