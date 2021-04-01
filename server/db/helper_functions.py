@@ -204,7 +204,7 @@ def generate_recipe_data(no_entries, faker_obj):
 
 
 def generate_user_data(no_entries, faker_obj):
-    """Creates the INSERT queries for the User table
+    """Create the INSERT queries for the User table.
 
     Args:
         <int> no_entries: The number of database entries to be created
@@ -232,7 +232,7 @@ def generate_user_data(no_entries, faker_obj):
 
 
 def generate_ingredients_data(no_entries, faker_obj):
-    """Creates the INSERT queries for the Ingredients table
+    """Create the INSERT queries for the Ingredients table.
 
     Args:
         <int> no_entries: The number of database entries to be created
@@ -244,7 +244,7 @@ def generate_ingredients_data(no_entries, faker_obj):
 
 
 def generate_allergies_data(no_entries, faker_obj):
-    """Creates the INSERT queries for the Ingredients table
+    """Create the INSERT queries for the Ingredients table.
 
     Args:
         <int> no_entries: The number of database entries to be created
@@ -256,18 +256,40 @@ def generate_allergies_data(no_entries, faker_obj):
 
 # Functions to create the respective tables
 
+
+def create_user_table():
+    """Create the user SQL table."""
+    table_name = 'User'
+
+    # Declare fields
+    user_id = field('user_id', integer(), auto_increment=True)
+    username = field('username', string())
+    first_name = field('first_name', string())
+    last_name = field('last_name', string())
+    password = field('password', string())
+    fields = [user_id, username, first_name, last_name, password]
+
+    # Declare constraints
+    p_key = primary_key(['user_id'])
+    constraints = [p_key]
+
+    # Create the table
+    create_statement = create_table(table_name, fields, constraints)
+
+    return create_statement
+
 # Function to write to the file
 
 
 def write_sql(file_handler, statements):
-    """Writes SQL to file specified withthe file handler
+    """Write SQL to file specified withthe file handler.
 
-        Args:
-            <list> statements: The list of statements to be written to the file
-            file_handler: The object used for writing to the file
+    Args:
+        <list> statements: The list of statements to be written to the file
+        file_handler: The object used for writing to the file
 
-        Returns:
-            None
+    Returns:
+        None
     """
     for line in statements:
         file_handler.write(f"{line}\n")
@@ -284,7 +306,3 @@ def main(faker_obj):
 
 if __name__ == "__main__":
     fake = Faker()
-    f_handler = open("./db/test.sql", "w")
-    data = generate_user_data(50, fake)
-    for line in data:
-        f_handler.write(f"{line}\n")
