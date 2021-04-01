@@ -263,7 +263,7 @@ DELIMITER ;
 
 def insert_all(table_name, values):
     """
-    Creates a single statement to insert multiple records 
+    Creates a single statement to insert multiple records
 
     Args:
         table_name(str):
@@ -404,6 +404,33 @@ INGREDIENTS = [
     "white sugar"
 ]
 
+ALLERGIES = [
+    "Nut Allergy",
+    "Oral Allergy Syndrome",
+    "Stone Fruit Allergy",
+    "Insulin Allergy",
+    "Allium Allergy",
+    "Histamine Allergy",
+    "Gluten Allergy",
+    "Legume Allergy",
+    "Salicylate Allergy",
+    "Cruciferous Allergy",
+    "Lactose intolerance",
+    "Shellfish Allergy",
+    "Sugar Allergy / Intolerance",
+    "Procrastination Allergy"
+]
+
+UNITS = [
+    "kg",
+    "cups",
+    "tsp",
+    "tbsp",
+    "ml",
+    "g",
+    "gallon"
+]
+
 # Utility Functions
 
 
@@ -472,10 +499,10 @@ def generate_user_data(no_entries, faker_obj):
     """Creates the INSERT queries for the User table
 
     Args:
-        <int> no_entries: The number of database entries to be created
+        (int) no_entries: The number of insert statements to be created
 
     Returns:
-        <string> A list containing the insert statement
+        (string) A list containing the insert statement
     """
 
     value_lists = []
@@ -501,10 +528,10 @@ def generate_ingredients_data():
     """Create the INSERT queries for the Ingredients table
 
     Args:
-        <int> no_entries: The number of database entries to be created
+        (int)no_entries: The number of insert statements to be created
 
     Returns:
-        <list> A list containing all of the insert statements
+        (string) A list containing the insert statement
     """
     value_lists = []
     for value in range(len(INGREDIENTS)):
@@ -522,43 +549,121 @@ def generate_ingredients_data():
         value_lists.append(ingredient_data)
 
     insert_statement = insert_all("ingredient", value_lists)
-
     return insert_statement
 
 
 def generate_allergies_data(no_entries, faker_obj):
-    """Creates the INSERT queries for the Ingredients table
+    """Creates the INSERT queries for the Allergy table
 
     Args:
-        <int> no_entries: The number of database entries to be created
+        no_entries(int): The number of insert statements to be created
 
     Returns:
-         <list> A list containing all of the insert statements
+        (string) A list containing the insert statement
     """
-    pass
+    value_lists = []
+    for value in range(len(ALLERGIES)):
+
+        # Pull from the allergies array
+        allergy_id = value+1
+        allergy_name = ALLERGIES[value]
+
+        # Create the insert list
+        allergy_data = [allergy_id, allergy_name]
+        value_lists.append(allergy_data)
+
+    insert_statement = insert_all("allergy", value_lists)
+    return insert_statement
+
+
+def generate_ingredient_allergies():
+    """Creates the INSERT queries for the Ingredient Allergies table
+
+    Args:
+        None
+
+    Returns:
+        (string) A list containing the insert statement
+    """
+    # Initializing key variables
+    value_lists = []
+    no_allergies = len(ALLERGIES)
+
+    for value in range(1, len(INGREDIENTS)):
+
+        # Randomly assign allergies
+        allergy_id = random.randint(1, no_allergies)
+        ingredient_id = value
+
+        # Create the insert list
+        allergy_data = [allergy_id, ingredient_id]
+        value_lists.append(allergy_data)
+
+    insert_statement = insert_all("ingredient_allergy", value_lists)
+    return insert_statement
+
+
+def generate_user_allergies(no_users):
+    """Creates the INSERT queries for the User Allergies table
+
+    Args:
+        (int) no_users: The number of users initially inserted
+
+    Returns:
+        (string) A list containing the insert statement
+    """
+    # Initializing key variables
+    value_lists = []
+    no_allergies = len(ALLERGIES)
+    # Assuming half of the users have allergies
+    user_ids = list(range(1, (no_users//2)))
+
+    for _ in range(1, (no_users//2)):
+
+        # Randomly assign allergies to users
+        allergy_id = random.randint(1, no_allergies)
+        user_id = random.choice(user_ids)
+        user_ids.pop(user_ids.index(user_id))  # Prevent duplicates
+
+        # Create the insert list
+        allergy_data = [allergy_id, user_id]
+        value_lists.append(allergy_data)
+
+    insert_statement = insert_all("user_allergy", value_lists)
+    return insert_statement
+
+
+def generate_measurment_inserts(no_entries):
+    """Creates the INSERT queries for the Ingredient Allergies table
+
+    Args:
+        no_entries(int): The number of insert statements to be created
+
+    Returns:
+        (string) A list containing the insert statement
+    """
+    # Initializing key variables
+    value_lists = []
+    for value in range(1, no_entries):
+
+        # Randomly generate measurement values
+        measurement_id = value
+        amount = random.uniform(2, 500)
+        unit = random.choice(UNITS)
+
+        # Craete the insert list
+        measurement_data = [measurement_id, amount, unit]
+        value_lists.append(measurement_data)
+
+    insert_statement = insert_all("measurement", value_lists)
+    return insert_statement
 
 # Functions to create the respective tables
-
-# Function to write to the file
-
-
-def write_sql(file_handler, statements):
-    """Writes SQL to file specified withthe file handler
-
-        Args:
-            <list> statements: The list of statements to be written to the file
-            file_handler: The object used for writing to the file
-
-        Returns:
-            None
-    """
-    for line in statements:
-        file_handler.write(f"{line}\n")
-
 
 ##### END CUSTOM GENERATORS #####
 
 ##### DB CREATION #####
+
 
 file_handler = open("sophro_db.sql", "w")
 
@@ -759,12 +864,17 @@ for table in tables:
 ##### DB INSERT #####
 
 if __name__ == "__main__":
-    #f_handler = open("./db/test.sql", "w")
     fake = Faker()
     user_data = generate_user_data(10, fake)
     recipe_data = generate_recipe_data(10, fake)
     ingredients_data = generate_ingredients_data()
-    file_handler.write(user_data)
-    file_handler.write(ingredients_data)
-    file_handler.write(recipe_data)
+    allergies_data = generate_allergies_data(10, fake)
+    ingredient_allergies = generate_ingredient_allergies()
+
+    data_lst = [user_data, recipe_data, ingredients_data,
+                allergies_data, ingredient_allergies]
+
+    for data_str in data_lst:
+        file_handler.write(data_str)
+
   #  file_handler.write(data)
