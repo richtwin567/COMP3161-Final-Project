@@ -849,6 +849,155 @@ tables.append(create_table("user_allergy",
                            ]))
 
 
+# create procedures
+
+procedures = []
+
+# procedure to insert recipe and retreive inserted record id
+procedures.append(create_procedure("insert_recipe", """
+    INSERT INTO recipe(image_url, prep_time, cook_time,  creation_date, culture, description, created_by)
+    VALUES (new_image_url, new_prep_time, new_cook_time, new_creation_date, new_culture, new_description, new_created_by);
+    SET new_id = LAST_INSERT_ID();
+    """,
+                                   [
+                                       parameter(Direction.IN,
+                                                 "mew_image_url", string()),
+                                       parameter(Direction.IN,
+                                                 "new_prep_time", time()),
+                                       parameter(Direction.IN,
+                                                 "new_cook_time", time()),
+                                       parameter(
+                                           Direction.IN, "new_creation_date", datetime()),
+                                       parameter(Direction.IN,
+                                                 "new_culture", string()),
+                                       parameter(
+                                           Direction.IN, "new_description", string(1500)),
+                                       parameter(Direction.IN,
+                                                 "new_created_by", integer()),
+                                       parameter(Direction.OUT,
+                                                 "new_id", integer())
+                                   ]))
+
+# procedure to insert allergy and retreive inserted record id
+procedures.append(create_procedure("insert_allergy", """
+    INSERT INTO allergy(allergy_name) VALUES(new_allergy);
+    SET new_id = LAST_INSERT_ID();
+    """,
+                                   [
+                                       parameter(Direction.IN,
+                                                 "new_allergy", string()),
+                                       parameter(Direction.OUT,
+                                                 "new_id", integer())
+                                   ]))
+
+# procedure to insert user and return inserted record id
+procedures.append(create_procedure("insert_user", """
+    INSERT INTO user(username, first_name, last_name, password) VALUES
+    (new_username, new_first_name, new_last_name, password);
+    SET new_id = LAST_INSERT_ID();
+    """,
+                                   [
+                                       parameter(Direction.IN,
+                                                 "new_username", string()),
+                                       parameter(Direction.IN,
+                                                 "new_first_name", string()),
+                                       parameter(Direction.IN,
+                                                 "new_last_name", string()),
+                                       parameter(Direction.IN,
+                                                 "new_password", string()),
+                                       parameter(Direction.OUT,
+                                                 "new_id", integer())
+                                   ]))
+
+# procedure to insert user and return inserted record id
+procedures.append(create_procedure("insert_user_with_allergy", """
+    INSERT INTO user(username, first_name, last_name, password) VALUES
+    (new_username, new_first_name, new_last_name, password);
+    SET new_id = LAST_INSERT_ID();
+    CALL insert_user_allergy(new_id, allergy_id);
+    """,
+                                   [
+                                       parameter(Direction.IN,
+                                                 "new_username", string()),
+                                       parameter(Direction.IN,
+                                                 "new_first_name", string()),
+                                       parameter(Direction.IN,
+                                                 "new_last_name", string()),
+                                       parameter(Direction.IN,
+                                                 "new_password", string()),
+                                       parameter(Direction.IN,
+                                                 "allergy_id", integer()),
+                                       parameter(Direction.OUT,
+                                                 "new_id", integer())
+                                   ]))
+
+# create delete procedure
+procedures.append(create_procedure("delete_record", """
+    DELETE FROM table_name WHERE condition;""",
+                                   [
+                                       parameter(Direction.IN,
+                                                 "table_name", string()),
+                                       parameter(Direction.IN,
+                                                 "condition", string())
+                                   ]))
+
+
+# get procedures
+
+procedures.append(create_procedure("join_ingredient_measurement", """
+    CREATE TEMPORARY TABLE join_ingredient_measurement_tbl
+    SELECT
+        rimj.recipe_d,
+        rimj.name, 
+        rimj.calorie_count, 
+        m.amount, 
+        m.unit 
+    FROM 
+        measurement m 
+        JOIN 
+            (
+                SELECT * 
+                FROM 
+                    recipe_ingredient_measurement rim 
+                    JOIN ingredient ing 
+                    ON ing.ingredient_id=rim.ingredient_id
+            ) rimj 
+        ON rimj.measurement_id=m.measurement_id
+    LIMIT 0;
+    """))
+
+procedures.append(create_procedure("get_all_recipes", """
+    CALL join_ingredient_measurement();
+    SELECT 
+        recipe_id,
+        image_url,
+        prep_time,
+        cook_time,
+        creation_date,
+        culture,
+        description,
+        created_by_name
+        JSON_OBJECTAGG(step_number, instruction_details) instructions,
+
+    FROM
+        SELECT
+        (
+            SELECT 
+                r.recipe_id, 
+                r.image_url,
+                r.prep_time,
+                r.cook_time,
+                r.creation_date,
+                r.culture,
+                r.description,
+                created_by created_by_id, 
+                JSON_OBJECTAGG(instr.step_number, instr.instruction_details) instructions
+            FROM recipe r JOIN instruction instr ON instr.recipe_id=r.recipe_id
+        ) ri
+        JOIN join_ingredient_measurement_tbl jimr 
+        ON ri.recipe_id=jimr.recipe_id;
+    """))
+
 file_handler.write(drop_stmt)
 
 file_handler.write(create_db_stmt)
@@ -858,6 +1007,7 @@ file_handler.write(use_db_stmt)
 # write all tables
 for table in tables:
     file_handler.write(table)
+
 
 ##### END DB CREATION #####
 
@@ -877,4 +1027,6 @@ if __name__ == "__main__":
     for data_str in data_lst:
         file_handler.write(data_str)
 
-  #  file_handler.write(data)
+    # close file
+
+    file_handler.close()
