@@ -5,7 +5,7 @@ import "./MainLayout.css";
 
 import { UserContext } from "context/UserContext";
 
-export default function MainLayout(props) {
+export default function MainLayout({ component: Component }) {
   const [selected, setSelected] = useState(0);
 
   const { userData } = useContext(UserContext);
@@ -13,6 +13,9 @@ export default function MainLayout(props) {
     <div id="main-layout">
       <SideBar user={userData} selected={selected} setSelected={setSelected} />
       <SearchBar />
+      <div class="content">
+        <Component></Component>
+      </div>
     </div>
   );
 }
