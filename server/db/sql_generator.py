@@ -629,6 +629,7 @@ def generate_user_allergies(no_users):
     # Initializing key variables
     value_lists = []
     no_allergies = len(ALLERGIES)
+
     # Assuming half of the users have allergies
     user_ids = list(range(1, (no_users//2)))
 
@@ -670,6 +671,62 @@ def generate_measurment_inserts(no_entries):
         value_lists.append(measurement_data)
 
     insert_statement = insert_all("measurement", value_lists)
+    return insert_statement
+
+
+# I do not recommend that we run this function with the amount of records
+# sir requested, since we'd be generating 6m records and im not sure
+# if any of our computers can handle that amount of data without crashing.
+def generate_in_stock_data(no_users):
+    """Creates the INSERT queries for the In Stock table
+
+    Args:
+       (int) no_users: The number of users initially created
+       (int) no_ingredients: The number of ingredients
+
+    Returns:
+        (string) A list containing the insert statement
+    """
+    # Initializing key variables
+    value_lists = []
+    no_ingredients = len(INGREDIENTS)
+    for user_id in range(1, no_users):
+        for ingredient_id in range(1, no_ingredients):
+            ingredient_amt = random.randint(0, 50)
+
+            # Create and store the insert list
+            stock_data = [user_id, ingredient_id, ingredient_amt]
+            value_lists.append(stock_data)
+
+    insert_statement = insert_all("in_stock", value_lists)
+    return insert_statement
+
+
+def generate_instruction_data(faker_obj, no_recipes):
+    """Creates the INSERT queries for the Instruction table.
+
+    Args:
+       (int) no_users: The number of recipes created
+
+    Returns:
+        (string) A list containing the insert statement
+    """
+    # Initializing key variables
+    value_lists = []
+    for instruction_id in range(1, no_recipes):
+        recipe_id = random.randint(1, no_recipes)
+        # Generate random instructions
+        no_steps = random.randint(2, 6)
+        instruction_list = [faker_obj.paragraph()] * no_steps
+        for step in range(1, no_steps+1):
+            instruction_details = instruction_list[step]
+
+            # Generate the insert list
+            instruction_data = [instruction_id,
+                                step, instruction_details, recipe_id]
+            value_lists.append(instruction_data)
+
+    insert_statement = insert_all("instruction", value_lists)
     return insert_statement
 
 # Functions to create the respective tables
