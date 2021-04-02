@@ -1,0 +1,85 @@
+#auth-form {
+  height: 60vh;
+  background: #ffffff;
+  box-shadow: 3px 4px 4px rgba(0, 0, 0, 0.25);
+  border-radius: 30px;
+  display: flex;
+  padding: 40px;
+  flex-direction: column;
+}
+
+#auth-header {
+  text-align: center;
+  font-family: Zilla Slab;
+}
+#auth-header h1 {
+  color: var(--primary);
+}
+
+#auth-header p {
+  font-size: 0.85em;
+  font-weight: bold;
+  color: var(--grey2);
+}
+
+#auth-form form {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+#auth-form input {
+  margin: 10px;
+}
+
+#auth-toggle {
+  font-size: 0.9em;
+  color: var(--grey2);
+  font-weight: bold;
+  margin: 15px 0;
+}
+
+#auth-toggle span {
+  color: var(--primary);
+}
+
+#auth-toggle span:hover {
+  color: var(--primary-dark);
+  cursor: pointer;
+}
+
+#auth-form input[type="text"],
+[type="password"] {
+  border: none;
+  width: 100%;
+  padding: 5px;
+  padding-left: 2.3em;
+  border-bottom: 2px solid var(--primary);
+}
+
+.auth-btn {
+  width: 40%;
+  padding: 10px 8px;
+  border: none;
+  font-size: 16px;
+  background-color: var(--primary);
+  color: var(--on-dark);
+  border-radius: 5px;
+}
+
+.auth-btn:hover {
+  background-color: var(--primary-dark);
+}
+
+#username {
+  margin: 3em 0;
+  background: url("assets/account_circle.svg") no-repeat scroll;
+  background-size: contain;
+}
+
+#password {
+  margin: 3em 0;
+  background: url("assets/lock.svg") no-repeat scroll;
+  background-size: contain;
+}
