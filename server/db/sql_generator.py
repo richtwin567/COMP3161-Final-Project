@@ -77,6 +77,13 @@ def sql_datetime():
     return "DATETIME"
 
 
+def boolean():
+    """
+    The data type to represent boolean
+    """
+    return "TINYINT"
+
+
 ######  END TYPES   ######
 
 
@@ -367,11 +374,18 @@ FOODS = [
     "Milkshake",
     "Icecream",
     "Muffin",
-    "Lasagne",
-    "Pie",
-    "Porridge",
+    "Beef Lasagne",
+    "Shepard's Pie",
+    "Cornmeal Porridge",
     "Bread",
     "Brownies",
+    "Red Peas Soup",
+    "Chicken Soup",
+    "Plantain Porridge",
+    "Chop Suey",
+    "Fried Rice",
+    "Apple Pie",
+    "Pecan Pie"
 ]
 
 INGREDIENTS = [
@@ -848,6 +862,19 @@ tables.append(create_table("user_allergy",
                                    "allergy_id", "allergy", "allergy_id")
                            ]))
 
+# in_stock table
+tables.append(create_table("in_stock",
+                           [
+                               field("user_id", integer()),
+                               field("ingredient_id", integer()),
+                               field("in_stock", boolean())
+                           ],
+                           [
+                               primary_key(["user_id", "ingredient_id"]),
+                               foreign_key("user_id", "user", "user_id"),
+                               foreign_key("ingredient_id",
+                                           "ingredient", "ingredient_id")
+                           ]))
 
 # create procedures
 
@@ -931,27 +958,33 @@ procedures.append(create_procedure("insert_user_with_allergy", """
                                                  "new_id", integer())
                                    ]))
 
-# create delete procedure
+# simple delete procedure
 procedures.append(create_procedure("delete_record", """
-    DELETE FROM table_name WHERE condition;""",
+    DELETE FROM table_name WHERE id=value;""",
                                    [
                                        parameter(Direction.IN,
                                                  "table_name", string()),
+                                       parameter(Direction.IN, "id", string()),
                                        parameter(Direction.IN,
-                                                 "condition", string())
+                                                 "value", integer())
                                    ]))
 
 
 # get procedures
 
 procedures.append(create_procedure("join_ingredient_measurement", """
-    CREATE TEMPORARY TABLE join_ingredient_measurement_tbl
+    DROP VIEW IF EXISTS ingredient_measurements;
+    CREATE VIEW ingredient_measurements
+    AS
     SELECT
-        rimj.recipe_d,
-        rimj.name, 
-        rimj.calorie_count, 
-        m.amount, 
-        m.unit 
+        rimj.recipe_id,
+        JSON_ARRAYAGG(
+            JSON_OBJECT(
+                'ingredient_name', rimj.name, 
+                'calorie_count', rimj.calorie_count, 
+                'measurement', JSON_OBJECT('amount', m.amount,'unit', m.unit )
+            )
+        ) ingredients
     FROM 
         measurement m 
         JOIN 
@@ -963,24 +996,28 @@ procedures.append(create_procedure("join_ingredient_measurement", """
                     ON ing.ingredient_id=rim.ingredient_id
             ) rimj 
         ON rimj.measurement_id=m.measurement_id
-    LIMIT 0;
+    GROUP BY rimj.recipe_id;
     """))
 
+# Procedure to get all ingredients
 procedures.append(create_procedure("get_all_recipes", """
     CALL join_ingredient_measurement();
+    DROP VIEW IF EXISTS all_recipes;
+    CREATE VIEW all_recipes
+    AS
     SELECT 
-        recipe_id,
-        image_url,
-        prep_time,
-        cook_time,
-        creation_date,
-        culture,
-        description,
-        created_by_name
-        JSON_OBJECTAGG(step_number, instruction_details) instructions,
-
+        ri.recipe_id,
+        ri.image_url,
+        ri.prep_time,
+        ri.cook_time,
+        ri.creation_date,
+        ri.culture,
+        ri.description,
+        JSON_ARRAYAGG(ri.instruction) instructions,
+        jimr.ingredients
     FROM
-        SELECT
+        ingredient_measurements jimr 
+        JOIN
         (
             SELECT 
                 r.recipe_id, 
@@ -991,13 +1028,60 @@ procedures.append(create_procedure("get_all_recipes", """
                 r.culture,
                 r.description,
                 created_by created_by_id, 
-                JSON_OBJECTAGG(instr.step_number, instr.instruction_details) instructions
+                JSON_OBJECTAGG(instr.step_number, instr.instruction_details) instruction
             FROM recipe r JOIN instruction instr ON instr.recipe_id=r.recipe_id
+            GROUP BY r.recipe_id
         ) ri
-        JOIN join_ingredient_measurement_tbl jimr 
-        ON ri.recipe_id=jimr.recipe_id;
+        ON ri.recipe_id=jimr.recipe_id
+        GROUP BY ri.recipe_id;
     """))
 
+# get planned meals with recipe
+procedures.append(create_procedure("get_planned_meals_with_recipe", """
+    CALL get_all_recipes();
+    DROP VIEW IF EXISTS planned_meals_with_recipe;
+    CREATE VIEW planned_meals_with_recipe
+    AS
+    SELECT *
+    FROM
+        planned_meal p JOIN all_recipes a ON p.recipe_id=a.recipe_id;
+    """))
+
+# get a specific user's meal plan
+procedures.append(create_procedure("get_user_meal_plan", """
+    CALL get_planned_meals_with_recipe();
+    SELECT 
+        m.for_user, 
+        m.plan_id,
+        JSON_ARRAYAGG(JSON_OBJECT(
+            'image_url',
+            p.image_url,
+            'time_of_day',
+            p.time_of_day,
+            'serving_size', 
+            p.serving_size,
+            'prep_time',
+            p.prep_time,
+            'cook_time',
+            p.cook_time,
+            'creation_date',
+            p.creation_date,
+            'instructions',
+            p.instructions,
+            'ingredients',
+            p.ingredients,
+            'culture',
+            p.culture,
+            'description',
+            p.description))
+    FROM
+        meal_plan m JOIN planned_meals_with_recipe p ON p.plan_id=m.plan_id
+    WHERE m.for_user=uid
+    GROUP BY m.plan_id;
+    """,
+                                   [parameter(Direction.IN, "uid", integer())]))
+
+# write data
 file_handler.write(drop_stmt)
 
 file_handler.write(create_db_stmt)
@@ -1007,6 +1091,10 @@ file_handler.write(use_db_stmt)
 # write all tables
 for table in tables:
     file_handler.write(table)
+
+# write all procedures
+for procedure in procedures:
+    file_handler.write(procedure)
 
 
 ##### END DB CREATION #####
