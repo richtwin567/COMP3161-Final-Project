@@ -1,4 +1,5 @@
 from faker import Faker
+from datetime import datetime
 import random
 
 
@@ -35,11 +36,13 @@ def floating_point(p=2):
 
     return f"FLOAT({p})"
 
+
 def integer():
     """
     The int data type
     """
     return "INT"
+
 
 def string(max=255):
     """
@@ -51,6 +54,7 @@ def string(max=255):
     """
     return f"VARCHAR({max})"
 
+
 def enum(values):
     """
     the enum data type
@@ -58,17 +62,20 @@ def enum(values):
     values = [quote_string(value) for value in values]
     return f"""ENUM({", ".join(values)})"""
 
+
 def time():
     """
     The time data type
     """
     return "TIME"
 
-def datetime():
+
+def sql_datetime():
     """
     the datetime data type
     """
     return "DATETIME"
+
 
 def boolean():
     """
@@ -89,7 +96,7 @@ def primary_key(field_names):
     Args:
         field_names (str | list) :
             The names of the fields that make up the primary key
-    
+
     Return:
         str: the primary key constraint
     """
@@ -121,7 +128,7 @@ def foreign_key(field_name, ref_table, ref_field, cascade_on_delete=True, cascad
 
         cascade_on_update(bool):
             If true, on update is set to cascade. If false on update is set to restict
-    
+
     Return:
         str: The foreign key constraint
     """
@@ -136,7 +143,7 @@ def unique_key(field_names):
     Args:
         field_names (str | list) :
             The names of the fields that make up the unique key
-    
+
     Return:
         str: the unique key constraint
     """
@@ -158,7 +165,7 @@ def field(name, type, not_null=True, auto_increment=False):
     Args:
         name(str):
             The field name
-        
+
         type(str):
             The data type of the field
 
@@ -167,7 +174,7 @@ def field(name, type, not_null=True, auto_increment=False):
 
         auto_increment(bool):
             whether the field auto increments
-    
+
     Returns:
         str: The field
     """
@@ -234,13 +241,13 @@ def create_procedure(procedure_name, query, parameters=[]):
     Args:
         procedure_name(str):
             The name of the procedure
-        
+
         query(str):
             The query the procedure should execute
 
         parameters(list[str]):
             The parameters the procedure takes
-        
+
     Returns:
         str: The create procedure statement
     """
@@ -263,7 +270,7 @@ DELIMITER ;
 
 def insert_all(table_name, values):
     """
-    Creates a single statement to insert multiple records 
+    Creates a single statement to insert multiple records
 
     Args:
         table_name(str):
@@ -271,7 +278,7 @@ def insert_all(table_name, values):
 
         values(list[list[str]]):
             The list of value lists to insert
-    
+
     Returns:
         str: The insert statement
     """
@@ -291,6 +298,7 @@ def insert_all(table_name, values):
 INSERT INTO {table_name} VALUES
     ({list_str_values});
 """
+
 
 def insert_one(table_name, value_list):
     """Generate SQL insert statements based on the table name and values.
@@ -388,11 +396,79 @@ FOODS = [
     "Pecan Pie"
 ]
 
-def random_recipe_name():
-    c_adjectives = random.choices(ADJECTIVES,k=2)
-    c_foods = random.choices(FOODS,k=2)
+INGREDIENTS = [
+    "meat cuts",
+    "file powder",
+    "smoked sausage",
+    "okra",
+    "shrimp",
+    "andouille sausage",
+    "water",
+    "paprika",
+    "hot sauce",
+    "garlic cloves",
+    "browning",
+    "lump crab meat",
+    "vegetable oil",
+    "all-purpose flour",
+    "freshly ground pepper",
+    "flat leaf parsley",
+    "boneless chicken skinless thigh",
+    "dried thyme",
+    "white rice",
+    "yellow onion",
+    "ham",
+    "baking powder",
+    "eggs",
+    "all-purpose flour",
+    "raisins",
+    "milk",
+    "white sugar"
+]
 
-    return " ".join([c_adjectives[0],random.choice(CONJUNCTIONS), c_adjectives[1],c_foods[0] ,random.choice(CONJUNCTIONS), c_foods[1]])
+ALLERGIES = [
+    "Nut Allergy",
+    "Oral Allergy Syndrome",
+    "Stone Fruit Allergy",
+    "Insulin Allergy",
+    "Allium Allergy",
+    "Histamine Allergy",
+    "Gluten Allergy",
+    "Legume Allergy",
+    "Salicylate Allergy",
+    "Cruciferous Allergy",
+    "Lactose intolerance",
+    "Shellfish Allergy",
+    "Sugar Allergy / Intolerance",
+    "Procrastination Allergy"
+]
+
+UNITS = [
+    "kg",
+    "cups",
+    "tsp",
+    "tbsp",
+    "ml",
+    "g",
+    "gallon"
+]
+
+# Utility Functions
+
+
+def random_recipe_name():
+    c_adjectives = random.choices(ADJECTIVES, k=2)
+    c_foods = random.choices(FOODS, k=2)
+
+    return " ".join([c_adjectives[0], random.choice(CONJUNCTIONS), c_adjectives[1], c_foods[0], random.choice(CONJUNCTIONS), c_foods[1]])
+
+
+def random_time():
+    hours = str(random.randint(0, 3)).zfill(2)
+    minutes = str(random.randint(0, 59)).zfill(2)
+    seconds = str(random.randint(0, 59)).zfill(2)
+
+    return f"{hours}:{minutes}:{seconds}"
 
 
 # Functions to generate the insert statements
@@ -407,19 +483,48 @@ def generate_recipe_data(no_entries, faker_obj):
     Returns:
         A list containing all of the insert statements
     """
-    insert_statements = []
+    value_lists = []
     for value in range(no_entries):
-        pass
+
+        # Retrieve and format the current date
+        now = datetime.utcnow()
+        creation_date = now.strftime('%Y-%m-%d %H:%M:%S')
+
+        # Generate fake recipe data
+        recipe_id = value+1
+        img_url = faker_obj.image_url()
+        prep_time = random_time()
+        cook_time = random_time()
+
+        culture = faker_obj.language_name()
+        description = faker_obj.paragraph()
+        recipe_name = random_recipe_name()
+
+        if no_entries > 600000:  # Temporary solution
+            created_by = random.randint(0, 200000)
+        else:
+            created_by = random.randint(1, no_entries)
+
+        # Create the insert list
+        recipe_lst = [recipe_id, img_url, prep_time, cook_time,
+                      creation_date, culture, description, recipe_name,
+                      created_by]
+
+        value_lists.append(recipe_lst)
+
+    insert_statement = insert_all('recipe', value_lists)
+
+    return insert_statement
 
 
 def generate_user_data(no_entries, faker_obj):
     """Creates the INSERT queries for the User table
 
     Args:
-        <int> no_entries: The number of database entries to be created
+        (int) no_entries: The number of insert statements to be created
 
     Returns:
-        <string> A list containing the insert statement
+        (string) A list containing the insert statement
     """
 
     value_lists = []
@@ -435,57 +540,209 @@ def generate_user_data(no_entries, faker_obj):
         # Create the insert list
         value_lst = [user_id, username, first_name, last_name, password]
         value_lists.append(value_lst)
-    
-    insert_statement = insert_all("user",value_lists)
+
+    insert_statement = insert_all("user", value_lists)
 
     return insert_statement
 
 
-def generate_ingredients_data(no_entries, faker_obj):
-    """Creates the INSERT queries for the Ingredients table
+def generate_ingredients_data():
+    """Create the INSERT queries for the Ingredients table
 
     Args:
-        <int> no_entries: The number of database entries to be created
+        (int)no_entries: The number of insert statements to be created
 
     Returns:
-        <list> A list containing all of the insert statements
+        (string) A list containing the insert statement
     """
-    pass
+    value_lists = []
+    for value in range(len(INGREDIENTS)):
+
+        # Pull from the ingredients array
+        ingredient_id = value+1
+        stock_quantity = random.randint(0, 200)  # Randomize the quantity
+        ingredient_name = INGREDIENTS[value]
+        calorie_count = random.randint(0, 2500)
+
+        # Create the insert list
+        ingredient_data = [ingredient_id, stock_quantity,
+                           ingredient_name, calorie_count]
+
+        value_lists.append(ingredient_data)
+
+    insert_statement = insert_all("ingredient", value_lists)
+    return insert_statement
 
 
 def generate_allergies_data(no_entries, faker_obj):
-    """Creates the INSERT queries for the Ingredients table
+    """Creates the INSERT queries for the Allergy table
 
     Args:
-        <int> no_entries: The number of database entries to be created
+        no_entries(int): The number of insert statements to be created
 
     Returns:
-         <list> A list containing all of the insert statements
+        (string) A list containing the insert statement
     """
-    pass
+    value_lists = []
+    for value in range(len(ALLERGIES)):
+
+        # Pull from the allergies array
+        allergy_id = value+1
+        allergy_name = ALLERGIES[value]
+
+        # Create the insert list
+        allergy_data = [allergy_id, allergy_name]
+        value_lists.append(allergy_data)
+
+    insert_statement = insert_all("allergy", value_lists)
+    return insert_statement
+
+
+def generate_ingredient_allergies():
+    """Creates the INSERT queries for the Ingredient Allergies table
+
+    Args:
+        None
+
+    Returns:
+        (string) A list containing the insert statement
+    """
+    # Initializing key variables
+    value_lists = []
+    no_allergies = len(ALLERGIES)
+
+    for value in range(1, len(INGREDIENTS)):
+
+        # Randomly assign allergies
+        allergy_id = random.randint(1, no_allergies)
+        ingredient_id = value
+
+        # Create the insert list
+        allergy_data = [allergy_id, ingredient_id]
+        value_lists.append(allergy_data)
+
+    insert_statement = insert_all("ingredient_allergy", value_lists)
+    return insert_statement
+
+
+def generate_user_allergies(no_users):
+    """Creates the INSERT queries for the User Allergies table
+
+    Args:
+        (int) no_users: The number of users initially inserted
+
+    Returns:
+        (string) A list containing the insert statement
+    """
+    # Initializing key variables
+    value_lists = []
+    no_allergies = len(ALLERGIES)
+
+    # Assuming half of the users have allergies
+    user_ids = list(range(1, (no_users//2)))
+
+    for _ in range(1, (no_users//2)):
+
+        # Randomly assign allergies to users
+        allergy_id = random.randint(1, no_allergies)
+        user_id = random.choice(user_ids)
+        user_ids.pop(user_ids.index(user_id))  # Prevent duplicates
+
+        # Create the insert list
+        allergy_data = [allergy_id, user_id]
+        value_lists.append(allergy_data)
+
+    insert_statement = insert_all("user_allergy", value_lists)
+    return insert_statement
+
+
+def generate_measurment_inserts(no_entries):
+    """Creates the INSERT queries for the Ingredient Allergies table
+
+    Args:
+        no_entries(int): The number of insert statements to be created
+
+    Returns:
+        (string) A list containing the insert statement
+    """
+    # Initializing key variables
+    value_lists = []
+    for value in range(1, no_entries):
+
+        # Randomly generate measurement values
+        measurement_id = value
+        amount = random.uniform(2, 500)
+        unit = random.choice(UNITS)
+
+        # Craete the insert list
+        measurement_data = [measurement_id, amount, unit]
+        value_lists.append(measurement_data)
+
+    insert_statement = insert_all("measurement", value_lists)
+    return insert_statement
+
+
+# I do not recommend that we run this function with the amount of records
+# sir requested, since we'd be generating 6m records and im not sure
+# if any of our computers can handle that amount of data without crashing.
+def generate_in_stock_data(no_users):
+    """Creates the INSERT queries for the In Stock table
+
+    Args:
+       (int) no_users: The number of users initially created
+       (int) no_ingredients: The number of ingredients
+
+    Returns:
+        (string) A list containing the insert statement
+    """
+    # Initializing key variables
+    value_lists = []
+    no_ingredients = len(INGREDIENTS)
+    for user_id in range(1, no_users):
+        for ingredient_id in range(1, no_ingredients):
+            ingredient_amt = random.randint(0, 50)
+
+            # Create and store the insert list
+            stock_data = [user_id, ingredient_id, ingredient_amt]
+            value_lists.append(stock_data)
+
+    insert_statement = insert_all("in_stock", value_lists)
+    return insert_statement
+
+
+def generate_instruction_data(faker_obj, no_recipes):
+    """Creates the INSERT queries for the Instruction table.
+
+    Args:
+       (int) no_users: The number of recipes created
+
+    Returns:
+        (string) A list containing the insert statement
+    """
+    # Initializing key variables
+    value_lists = []
+    for instruction_id in range(1, no_recipes):
+        recipe_id = random.randint(1, no_recipes)
+        # Generate random instructions
+        no_steps = random.randint(2, 6)
+        instruction_list = [faker_obj.paragraph()] * no_steps
+        for step in range(1, no_steps+1):
+            instruction_details = instruction_list[step]
+
+            # Generate the insert list
+            instruction_data = [instruction_id,
+                                step, instruction_details, recipe_id]
+            value_lists.append(instruction_data)
+
+    insert_statement = insert_all("instruction", value_lists)
+    return insert_statement
 
 # Functions to create the respective tables
-
-# Function to write to the file
-
-
-def write_sql(file_handler, statements):
-    """Writes SQL to file specified withthe file handler
-
-        Args:
-            <list> statements: The list of statements to be written to the file
-            file_handler: The object used for writing to the file
-
-        Returns:
-            None
-    """
-    for line in statements:
-        file_handler.write(f"{line}\n")
-
 
 ##### END CUSTOM GENERATORS #####
 
 ##### DB CREATION #####
+
 
 file_handler = open("sophro_db.sql", "w")
 
@@ -501,240 +758,281 @@ use_db_stmt = f"USE {db_name};\n\n"
 
 # build tables
 
-tables=[]
+tables = []
 
-# allergy table 
-tables.append(create_table("allergy", 
-    [
-        field("allergy_id", integer(), auto_increment=True), 
-        field("allergy_name", string())
-    ], 
-    [primary_key("allergy_id")]
-))
+# allergy table
+tables.append(create_table("allergy",
+                           [
+                               field("allergy_id", integer(),
+                                     auto_increment=True),
+                               field("allergy_name", string())
+                           ],
+                           [primary_key("allergy_id")]
+                           ))
 
 
 # ingredient table
 tables.append(create_table("ingredient",
-    [
-        field("ingredient_id", integer(), auto_increment=True),
-        field("stock_quantity", integer()),
-        field("name", string()),
-        field("calorie_count", integer())
-    ], 
-    [primary_key("ingredient_id")]
-))
+                           [
+                               field("ingredient_id", integer(),
+                                     auto_increment=True),
+                               field("stock_quantity", integer()),
+                               field("name", string()),
+                               field("calorie_count", integer())
+                           ],
+                           [primary_key("ingredient_id")]
+                           ))
 
 
 # measurement table
 tables.append(create_table("measurement",
-    [
-        field("measurement_id", integer(), auto_increment=True),
-        field("amount", floating_point()),
-        field("unit", string(15))
-    ],
-    [
-        primary_key("measurement_id")
-    ]
-))
+                           [
+                               field("measurement_id", integer(),
+                                     auto_increment=True),
+                               field("amount", floating_point()),
+                               field("unit", string(15))
+                           ],
+                           [
+                               primary_key("measurement_id")
+                           ]
+                           ))
 
 
 # user table
 tables.append(create_table("user",
-    [
-        field("user_id", integer(), auto_increment=True),
-        field("username", string()),
-        field("first_name", string()),
-        field("last_name", string()),
-        field("password",string())
-    ],
-    [
-        primary_key("user_id"),
-        unique_key("username")
-    ]))
+                           [
+                               field("user_id", integer(),
+                                     auto_increment=True),
+                               field("username", string()),
+                               field("first_name", string()),
+                               field("last_name", string()),
+                               field("password", string())
+                           ],
+                           [
+                               primary_key("user_id"),
+                               unique_key("username")
+                           ]))
 
 
 # recipe table
 tables.append(create_table("recipe",
-    [
-        field("recipe_id",integer(),auto_increment=True),
-        field("image_url", string()),
-        field("prep_time", time()),
-        field("cook_time", time()),
-        field("creation_date",datetime()),
-        field("culture", string()),
-        field("description", string(1500)),
-        field("created_by", integer(),False)
-    ],
-    [
-        primary_key("recipe_id"),
-        foreign_key("created_by", "user", "user_id",False)
-    ]))
+                           [
+                               field("recipe_id", integer(),
+                                     auto_increment=True),
+                               field("image_url", string()),
+                               field("prep_time", time()),
+                               field("cook_time", time()),
+                               field("creation_date", sql_datetime()),
+                               field("culture", string()),
+                               field("description", string()),
+                               field("recipe_name", string()),
+                               field("created_by", integer(), False)
+                           ],
+                           [
+                               primary_key("recipe_id"),
+                               foreign_key("created_by", "user",
+                                           "user_id", False)
+                           ]))
 
 
-# ingredient_allergy table 
+# ingredient_allergy table
 tables.append(create_table("ingredient_allergy",
-    [
-        field("allergy_id",integer()),
-        field("ingredient_id", integer())
-    ],
-    [
-        primary_key(["allergy_id","ingredient_id"]),
-        foreign_key("allergy_id","allergy","allergy_id"),
-        foreign_key("ingredient_id","ingredient","ingredient_id")
-    ]))
+                           [
+                               field("allergy_id", integer()),
+                               field("ingredient_id", integer())
+                           ],
+                           [
+                               primary_key(["allergy_id", "ingredient_id"]),
+                               foreign_key("allergy_id", "allergy",
+                                           "allergy_id"),
+                               foreign_key("ingredient_id",
+                                           "ingredient", "ingredient_id")
+                           ]))
 
 
 # instruction table
 tables.append(create_table("instruction",
-    [
-        field("instruction_id",integer(), auto_increment=True),
-        field('step_number',integer()),
-        field("instruction_details", string()),
-        field("recipe_id", integer())
-    ],
-    [
-        primary_key("instruction_id"),
-        foreign_key("recipe_id","recipe","recipe_id")
-    ]))
+                           [
+                               field("instruction_id", integer(),
+                                     auto_increment=True),
+                               field('step_number', integer()),
+                               field("instruction_details", string()),
+                               field("recipe_id", integer())
+                           ],
+                           [
+                               primary_key("instruction_id"),
+                               foreign_key("recipe_id", "recipe", "recipe_id")
+                           ]))
 
 
 # recipe_ingredient_measurement table
 tables.append(create_table("recipe_ingredient_measurement",
-    [
-        field("recipe_id", integer()),
-        field("ingredient_id", integer()),
-        field("measurement_id", integer())
-    ],
-    [
-        primary_key(["recipe_id", "ingredient_id", "measurement_id"]),
-        foreign_key("recipe_id","recipe","recipe_id"),
-        foreign_key("ingredient_id","ingredient","ingredient_id"),
-        foreign_key("measurement_id","measurement","measurement_id")
-    ]))
+                           [
+                               field("recipe_id", integer()),
+                               field("ingredient_id", integer()),
+                               field("measurement_id", integer())
+                           ],
+                           [
+                               primary_key(
+                                   ["recipe_id", "ingredient_id", "measurement_id"]),
+                               foreign_key("recipe_id", "recipe", "recipe_id"),
+                               foreign_key("ingredient_id",
+                                           "ingredient", "ingredient_id"),
+                               foreign_key("measurement_id",
+                                           "measurement", "measurement_id")
+                           ]))
 
 
 # meal_plan table
 tables.append(create_table("meal_plan",
-    [
-        field("plan_id",integer(), auto_increment=True),
-        field("for_user", integer())
-    ],
-    [
-        primary_key("plan_id"),
-        foreign_key("for_user","user","user_id")
-    ]))
+                           [
+                               field("plan_id", integer(),
+                                     auto_increment=True),
+                               field("for_user", integer())
+                           ],
+                           [
+                               primary_key("plan_id"),
+                               foreign_key("for_user", "user", "user_id")
+                           ]))
 
 
 # planned_meal table
 tables.append(create_table("planned_meal",
-    [
-        field("meal_id", integer(), auto_increment=True),
-        field("time_of_day",enum(["Breakfast","Lunch", "Dinner"])),
-        field("serving_size",integer()),
-        field("recipe_id",integer()),
-        field("plan_id",integer())
-    ],
-    [
-        primary_key(["meal_id","plan_id"]),
-        foreign_key("recipe_id","recipe", "recipe_id"),
-        foreign_key("plan_id","meal_plan","plan_id")
-    ]))
+                           [
+                               field("meal_id", integer(),
+                                     auto_increment=True),
+                               field("time_of_day", enum(
+                                   ["Breakfast", "Lunch", "Dinner"])),
+                               field("serving_size", integer()),
+                               field("recipe_id", integer()),
+                               field("plan_id", integer())
+                           ],
+                           [
+                               primary_key(["meal_id", "plan_id"]),
+                               foreign_key("recipe_id", "recipe", "recipe_id"),
+                               foreign_key("plan_id", "meal_plan", "plan_id")
+                           ]))
 
 
 # user_allergy table
 tables.append(create_table("user_allergy",
-    [
-        field("user_id",integer()),
-        field("allergy_id", integer())
-    ],
-    [
-        primary_key(["user_id","allergy_id"]),
-        foreign_key("user_id","user","user_id"),
-        foreign_key("allergy_id","allergy","allergy_id")
-    ]))
+                           [
+                               field("user_id", integer()),
+                               field("allergy_id", integer())
+                           ],
+                           [
+                               primary_key(["user_id", "allergy_id"]),
+                               foreign_key("user_id", "user", "user_id"),
+                               foreign_key(
+                                   "allergy_id", "allergy", "allergy_id")
+                           ]))
 
 # in_stock table
 tables.append(create_table("in_stock",
-    [
-        field("user_id",integer()),
-        field("ingredient_id", integer()),
-        field("in_stock", boolean())
-    ],
-    [
-        primary_key(["user_id", "ingredient_id"]),
-        foreign_key("user_id","user","user_id"),
-        foreign_key("ingredient_id","ingredient","ingredient_id")
-    ]))
+                           [
+                               field("user_id", integer()),
+                               field("ingredient_id", integer()),
+                               field("in_stock", boolean())
+                           ],
+                           [
+                               primary_key(["user_id", "ingredient_id"]),
+                               foreign_key("user_id", "user", "user_id"),
+                               foreign_key("ingredient_id",
+                                           "ingredient", "ingredient_id")
+                           ]))
 
 # create procedures
 
-procedures=[]
+procedures = []
 
 # procedure to insert recipe and retreive inserted record id
 procedures.append(create_procedure("insert_recipe", """
     INSERT INTO recipe(image_url, prep_time, cook_time,  creation_date, culture, description, created_by)
     VALUES (new_image_url, new_prep_time, new_cook_time, new_creation_date, new_culture, new_description, new_created_by);
     SET new_id = LAST_INSERT_ID();
-    """ , 
-    [
-        parameter(Direction.IN, "mew_image_url", string()),
-        parameter(Direction.IN, "new_prep_time", time()),
-        parameter(Direction.IN, "new_cook_time", time()),
-        parameter(Direction.IN, "new_creation_date", datetime()),
-        parameter(Direction.IN, "new_culture", string()),
-        parameter(Direction.IN, "new_description", string(1500)),
-        parameter(Direction.IN, "new_created_by", integer()),
-        parameter(Direction.OUT, "new_id", integer())
-    ]))
+    """,
+                                   [
+                                       parameter(Direction.IN,
+                                                 "mew_image_url", string()),
+                                       parameter(Direction.IN,
+                                                 "new_prep_time", time()),
+                                       parameter(Direction.IN,
+                                                 "new_cook_time", time()),
+                                       parameter(
+                                           Direction.IN, "new_creation_date", sql_datetime()),
+                                       parameter(Direction.IN,
+                                                 "new_culture", string()),
+                                       parameter(
+                                           Direction.IN, "new_description", string(1500)),
+                                       parameter(Direction.IN,
+                                                 "new_created_by", integer()),
+                                       parameter(Direction.OUT,
+                                                 "new_id", integer())
+                                   ]))
 
 # procedure to insert allergy and retreive inserted record id
-procedures.append(create_procedure("insert_allergy","""
+procedures.append(create_procedure("insert_allergy", """
     INSERT INTO allergy(allergy_name) VALUES(new_allergy);
     SET new_id = LAST_INSERT_ID();
     """,
-    [
-        parameter(Direction.IN, "new_allergy", string()),
-        parameter(Direction.OUT, "new_id", integer())
-    ]))
+                                   [
+                                       parameter(Direction.IN,
+                                                 "new_allergy", string()),
+                                       parameter(Direction.OUT,
+                                                 "new_id", integer())
+                                   ]))
 
 # procedure to insert user and return inserted record id
-procedures.append(create_procedure("insert_user","""
+procedures.append(create_procedure("insert_user", """
     INSERT INTO user(username, first_name, last_name, password) VALUES
     (new_username, new_first_name, new_last_name, password);
     SET new_id = LAST_INSERT_ID();
     """,
-    [
-        parameter(Direction.IN, "new_username", string()),
-        parameter(Direction.IN, "new_first_name", string()),
-        parameter(Direction.IN, "new_last_name", string()),
-        parameter(Direction.IN, "new_password", string()),
-        parameter(Direction.OUT, "new_id", integer())
-    ]))
+                                   [
+                                       parameter(Direction.IN,
+                                                 "new_username", string()),
+                                       parameter(Direction.IN,
+                                                 "new_first_name", string()),
+                                       parameter(Direction.IN,
+                                                 "new_last_name", string()),
+                                       parameter(Direction.IN,
+                                                 "new_password", string()),
+                                       parameter(Direction.OUT,
+                                                 "new_id", integer())
+                                   ]))
 
 # procedure to insert user and return inserted record id
-procedures.append(create_procedure("insert_user_with_allergy","""
+procedures.append(create_procedure("insert_user_with_allergy", """
     INSERT INTO user(username, first_name, last_name, password) VALUES
     (new_username, new_first_name, new_last_name, password);
     SET new_id = LAST_INSERT_ID();
     CALL insert_user_allergy(new_id, allergy_id);
     """,
-    [
-        parameter(Direction.IN, "new_username", string()),
-        parameter(Direction.IN, "new_first_name", string()),
-        parameter(Direction.IN, "new_last_name", string()),
-        parameter(Direction.IN, "new_password", string()),
-        parameter(Direction.IN, "allergy_id", integer()),
-        parameter(Direction.OUT, "new_id", integer())
-    ]))
+                                   [
+                                       parameter(Direction.IN,
+                                                 "new_username", string()),
+                                       parameter(Direction.IN,
+                                                 "new_first_name", string()),
+                                       parameter(Direction.IN,
+                                                 "new_last_name", string()),
+                                       parameter(Direction.IN,
+                                                 "new_password", string()),
+                                       parameter(Direction.IN,
+                                                 "allergy_id", integer()),
+                                       parameter(Direction.OUT,
+                                                 "new_id", integer())
+                                   ]))
 
 # simple delete procedure
-procedures.append(create_procedure("delete_record","""
+procedures.append(create_procedure("delete_record", """
     DELETE FROM table_name WHERE id=value;""",
-    [
-        parameter(Direction.IN, "table_name", string()),
-        parameter(Direction.IN, "id", string()),
-        parameter(Direction.IN, "value", integer())
-    ]))
+                                   [
+                                       parameter(Direction.IN,
+                                                 "table_name", string()),
+                                       parameter(Direction.IN, "id", string()),
+                                       parameter(Direction.IN,
+                                                 "value", integer())
+                                   ]))
 
 
 # get procedures
@@ -767,7 +1065,7 @@ procedures.append(create_procedure("join_ingredient_measurement", """
     """))
 
 # Procedure to get all ingredients
-procedures.append(create_procedure("get_all_recipes","""
+procedures.append(create_procedure("get_all_recipes", """
     CALL join_ingredient_measurement();
     DROP VIEW IF EXISTS all_recipes;
     CREATE VIEW all_recipes
@@ -804,7 +1102,7 @@ procedures.append(create_procedure("get_all_recipes","""
     """))
 
 # get planned meals with recipe
-procedures.append(create_procedure("get_planned_meals_with_recipe","""
+procedures.append(create_procedure("get_planned_meals_with_recipe", """
     CALL get_all_recipes();
     DROP VIEW IF EXISTS planned_meals_with_recipe;
     CREATE VIEW planned_meals_with_recipe
@@ -815,7 +1113,7 @@ procedures.append(create_procedure("get_planned_meals_with_recipe","""
     """))
 
 # get a specific user's meal plan
-procedures.append(create_procedure("get_user_meal_plan","""
+procedures.append(create_procedure("get_user_meal_plan", """
     CALL get_planned_meals_with_recipe();
     SELECT 
         m.for_user, 
@@ -846,7 +1144,7 @@ procedures.append(create_procedure("get_user_meal_plan","""
     WHERE m.for_user=uid
     GROUP BY m.plan_id;
     """,
-    [parameter(Direction.IN, "uid", integer())]))
+                                   [parameter(Direction.IN, "uid", integer())]))
 
 # write data
 file_handler.write(drop_stmt)
@@ -868,11 +1166,20 @@ for procedure in procedures:
 
 ##### DB INSERT #####
 
-fake = Faker()
-data = generate_user_data(50, fake)
-file_handler.write(data)
+if __name__ == "__main__":
+    fake = Faker()
+    user_data = generate_user_data(10, fake)
+    recipe_data = generate_recipe_data(10, fake)
+    ingredients_data = generate_ingredients_data()
+    allergies_data = generate_allergies_data(10, fake)
+    ingredient_allergies = generate_ingredient_allergies()
 
+    data_lst = [user_data, recipe_data, ingredients_data,
+                allergies_data, ingredient_allergies]
 
-# close file
+    for data_str in data_lst:
+        file_handler.write(data_str)
 
-file_handler.close()
+    # close file
+
+    file_handler.close()
