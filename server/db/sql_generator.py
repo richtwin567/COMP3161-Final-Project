@@ -534,8 +534,8 @@ def generate_user_data(no_entries, faker_obj):
         # Generate fake user data
         user_id = value+1
         username = faker_obj.unique.user_name()
-        first_name = faker_obj.unique.first_name()
-        last_name = faker_obj.unique.last_name()
+        first_name = faker_obj.first_name()
+        last_name = faker_obj.last_name()
         password = faker_obj.password(length=12)
 
         # Create the insert list
@@ -748,9 +748,6 @@ def generate_recipe_measurement():
 
     ##### DB CREATION #####
 
-
-file_handler = open("sophro_db.sql", "w")
-
 # create db
 
 db_name = "sophro"
@@ -772,21 +769,23 @@ tables.append(create_table("allergy",
                                      auto_increment=True),
                                field("allergy_name", string())
                            ],
-                           [primary_key("allergy_id")]
+                           [primary_key("allergy_id"), unique_key("allergy_name")]
                            ))
 
 
 # ingredient table
 tables.append(create_table("ingredient",
-                           [
-                               field("ingredient_id", integer(),
-                                     auto_increment=True),
-                               field("stock_quantity", integer()),
-                               field("name", string()),
-                               field("calorie_count", integer())
-                           ],
-                           [primary_key("ingredient_id")]
-                           ))
+    [
+        field("ingredient_id", integer(), auto_increment=True),
+        field("stock_quantity", integer()),
+        field("name", string()),
+        field("calorie_count", integer())
+    ],                          
+    [
+        primary_key("ingredient_id"),
+        unique_key("name")
+    ]
+))
 
 
 # measurement table
@@ -798,7 +797,8 @@ tables.append(create_table("measurement",
                                field("unit", string(15))
                            ],
                            [
-                               primary_key("measurement_id")
+                               primary_key("measurement_id"),
+                               unique_key(["amount", "unit"])
                            ]
                            ))
 
@@ -824,19 +824,20 @@ tables.append(create_table("recipe",
                            [
                                field("recipe_id", integer(),
                                      auto_increment=True),
+                               field("recipe_name", string()),
                                field("image_url", string()),
                                field("prep_time", time()),
                                field("cook_time", time()),
                                field("creation_date", sql_datetime()),
                                field("culture", string()),
                                field("description", string()),
-                               field("recipe_name", string()),
                                field("created_by", integer(), False)
                            ],
                            [
                                primary_key("recipe_id"),
                                foreign_key("created_by", "user",
-                                           "user_id", False)
+                                           "user_id", False),
+                                           unique_key("recipe_name")
                            ]))
 
 
@@ -866,7 +867,8 @@ tables.append(create_table("instruction",
                            ],
                            [
                                primary_key("instruction_id"),
-                               foreign_key("recipe_id", "recipe", "recipe_id")
+                               foreign_key("recipe_id", "recipe", "recipe_id"),
+                               unique_key(["instruction_id", "step_number", "instruction_details", "recipe_id"])
                            ]))
 
 
@@ -897,7 +899,8 @@ tables.append(create_table("meal_plan",
                            ],
                            [
                                primary_key("plan_id"),
-                               foreign_key("for_user", "user", "user_id")
+                               foreign_key("for_user", "user", "user_id"),
+                               unique_key("for_user")
                            ]))
 
 
@@ -968,7 +971,7 @@ procedures.append(create_procedure("insert_recipe", """
                                        parameter(Direction.IN,
                                                  "new_culture", string()),
                                        parameter(
-                                           Direction.IN, "new_description", string(1500)),
+                                           Direction.IN, "new_description", string(255)),
                                        parameter(Direction.IN,
                                                  "new_created_by", integer()),
                                        parameter(Direction.OUT,
@@ -1151,27 +1154,29 @@ procedures.append(create_procedure("get_user_meal_plan", """
     """,
                                    [parameter(Direction.IN, "uid", integer())]))
 
-# write data
-file_handler.write(drop_stmt)
-
-file_handler.write(create_db_stmt)
-
-file_handler.write(use_db_stmt)
-
-# write all tables
-for table in tables:
-    file_handler.write(table)
-
-# write all procedures
-for procedure in procedures:
-    file_handler.write(procedure)
-
 
 ##### END DB CREATION #####
 
 ##### DB INSERT #####
 
 if __name__ == "__main__":
+    file_handler = open("sophro_db.sql", "w")
+
+        # write data
+    file_handler.write(drop_stmt)
+
+    file_handler.write(create_db_stmt)
+
+    file_handler.write(use_db_stmt)
+
+    # write all tables
+    for table in tables:
+        file_handler.write(table)
+
+    # write all procedures
+    for procedure in procedures:
+        file_handler.write(procedure)
+
     fake = Faker()
     user_data = generate_user_data(10, fake)
     recipe_data = generate_recipe_data(10, fake)
