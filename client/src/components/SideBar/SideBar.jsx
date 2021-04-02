@@ -4,6 +4,7 @@ import "./SideBar.css";
 
 export default function SideBar(props) {
   const links = [
+    { path: "overview", label: "Overview" },
     { path: "recipes", label: "Recipes" },
     { path: "my-plan", label: "My Meal Plan" },
     { path: "plan-generator", label: "Meal Plan Generator" },

@@ -1,20 +1,20 @@
-#main-layout{
-    width: 100%;
-    height: 100vh;
-    display: grid;
-    grid-template-columns: 25% 75%;
-    grid-template-rows: 5rem minmax(0,1fr);
-    grid-template-areas: "sidebar searchbar" "sidebar pagecontent";
+#main-layout {
+  width: 100%;
+  height: 100vh;
+  display: grid;
+  grid-template-columns: 23% 77%;
+  grid-template-rows: 5rem minmax(0, 1fr);
+  grid-template-areas: "sidebar searchbar" "sidebar pagecontent";
 }
 
-#main-layout #sidebar{
-    grid-area: sidebar;
+#main-layout #sidebar {
+  grid-area: sidebar;
 }
 
-#main-layout #searchbar{
-    grid-area: searchbar;
+#main-layout #searchbar {
+  grid-area: searchbar;
 }
 
-#main-layout .content{
-    grid-area: pagecontent;
+#main-layout .content {
+  grid-area: pagecontent;
 }
