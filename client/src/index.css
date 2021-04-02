@@ -7,7 +7,26 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+* {
+  box-sizing: border-box;
+}
+
+:root{
+  --primary: #1E88E5;
+  --primary-dark: #0277BD;
+  --accent: #F9AC2F;
+  --on-light: #232323;
+  --on-dark: #ffffff;
+  --shadow: rgba(0,0,0,0.25);
+  --grey1:#C4C4C4;
+  --grey2: #787878;
+}
+
+.btn{
+  border: none;
+  outline: none;
+}
+
+a{
+  text-decoration: none;
 }

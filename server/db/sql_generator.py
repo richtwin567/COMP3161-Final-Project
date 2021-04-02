@@ -428,8 +428,8 @@ def generate_user_data(no_entries, faker_obj):
         # Generate fake user data
         user_id = value+1
         username = faker_obj.unique.user_name()
-        first_name = faker_obj.unique.first_name()
-        last_name = faker_obj.unique.last_name()
+        first_name = faker_obj.first_name()
+        last_name = faker_obj.last_name()
         password = faker_obj.password(length=12)
 
         # Create the insert list
@@ -520,8 +520,11 @@ tables.append(create_table("ingredient",
         field("stock_quantity", integer()),
         field("name", string()),
         field("calorie_count", integer())
-    ], 
-    [primary_key("ingredient_id")]
+    ],                          
+    [
+        primary_key("ingredient_id"),
+        unique_key("name")
+    ]
 ))
 
 
