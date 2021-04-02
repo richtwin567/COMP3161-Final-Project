@@ -282,13 +282,21 @@ def insert_all(table_name, values):
     Returns:
         str: The insert statement
     """
+    str_values = []
+    list_str_values = []
 
-    values = [", ".join([str(value) if not type(value) is str else quote_string(
-        value) for value in value_list]) for value_list in values]
-    values = "),\n\t(".join(values)
+    for value_list in values:
+        for value in value_list:
+            str_value =str(value) if not type(value) is str else quote_string(value)
+            str_values.append(str_value)
+        list_str_values.append(", ".join(str_values))
+        str_values=[]
+    
+    list_str_values = "),\n\t(".join(list_str_values)
+    
     return f"""
 INSERT INTO {table_name} VALUES
-    ({values});
+    ({list_str_values});
 """
 
 
