@@ -1,27 +1,17 @@
 import "./App.css";
-import { BrowserRouter, Switch, Route } from "react-router-dom";
-import Login from "./views/Login/Login";
-import MainLayout from "./components/MainLayout/MainLayout";
-import React, { useState } from "react";
+import { BrowserRouter } from "react-router-dom";
+import React from "react";
 
+import UserProvider from "context/UserContext";
+import { RouteClient } from "components/routes";
 function App() {
-	const [user, setUser] = useState({});
-
-	return (
-		<div className="App">
-			<BrowserRouter>
-				<Switch>
-					<Route exact path="/login">
-						<Login />
-					</Route>
-					<Route path="/app">
-						<MainLayout user={user} />
-					</Route>
-          {/* //TODO not found*/ }
-				</Switch>
-			</BrowserRouter>
-		</div>
-	);
+  return (
+    <UserProvider>
+      <BrowserRouter>
+        <RouteClient />
+      </BrowserRouter>
+    </UserProvider>
+  );
 }
 
 export default App;
