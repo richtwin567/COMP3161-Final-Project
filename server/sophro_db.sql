@@ -46,7 +46,8 @@ CREATE TABLE recipe (
 	cook_time TIME NOT NULL,
 	creation_date DATETIME NOT NULL,
 	culture VARCHAR(255) NOT NULL,
-	description VARCHAR(1500) NOT NULL,
+	description VARCHAR(255) NOT NULL,
+	recipe_name VARCHAR(255) NOT NULL,
 	created_by INT,
 
     PRIMARY KEY(recipe_id),
