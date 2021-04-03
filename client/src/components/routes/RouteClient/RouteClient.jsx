@@ -17,7 +17,7 @@ function RouteClient() {
 			<Route exact path="/auth">
 				<Auth />
 			</Route>
-			<Route exact path="/app/overview">
+			<Route exact path="/app/profile">
 				<MainLayout component={Profile} />
 			</Route>
 			<Route exact path="/app/my-plan">

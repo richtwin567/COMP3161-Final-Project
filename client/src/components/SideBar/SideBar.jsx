@@ -3,8 +3,9 @@ import { Link } from "react-router-dom";
 import "./SideBar.css";
 
 export default function SideBar(props) {
+
   const links = [
-    { path: "overview", label: "Overview" },
+    { path: "profile", label: "My Profile" },
     { path: "recipes", label: "Recipes" },
     { path: "my-plan", label: "My Meal Plan" },
     { path: "plan-generator", label: "Meal Plan Generator" },
@@ -12,11 +13,12 @@ export default function SideBar(props) {
     { path: "logout", label: "Logout" },
   ];
 
+  console.log(window.location.pathname);
+
   const items = links.map((item, i) => (
     <Link
       to={`/app/${item.path}`}
-      className={i === props.selected ? "selected" : undefined}
-      onClick={() => props.setSelected(i)}
+      className={window.location.pathname === `/app/${item.path}` ? "selected" : undefined}
     >
       {item.label}
     </Link>
