@@ -311,13 +311,14 @@ def insert_all(table_name, values):
 
     for value_list in values:
         for value in value_list:
-            str_value =str(value) if not type(value) is str else quote_string(value)
+            str_value = str(value) if not type(
+                value) is str else quote_string(value)
             str_values.append(str_value)
         list_str_values.append(", ".join(str_values))
-        str_values=[]
-    
+        str_values = []
+
     list_str_values = "),\n\t(".join(list_str_values)
-    
+
     return f"""
 INSERT INTO {table_name} VALUES
     ({list_str_values});
@@ -771,6 +772,7 @@ def generate_instruction_data(faker_obj, no_recipes):
     value_lists = []
     for instruction_id in range(1, no_recipes):
         recipe_id = random.randint(1, no_recipes)
+
         # Generate random instructions
         no_steps = random.randint(2, 6)
         instruction_list = [faker_obj.paragraph()] * no_steps
@@ -785,7 +787,10 @@ def generate_instruction_data(faker_obj, no_recipes):
     insert_statement = insert_all("instruction", value_lists)
     return insert_statement
 
+
 ##### END CUSTOM GENERATORS #####
+def generate_recipe_measurement():
+    pass
 
 ##### DB CREATION #####
 

@@ -1,14 +1,9 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins&family=Zilla+Slab:wght@300;400;500&display=swap");
 body {
 	margin: 0;
-	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto",
-		"Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans",
-		"Helvetica Neue", sans-serif;
+	font-family: Poppins;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
-}
-
-* {
-	box-sizing: border-box;
 }
 
 :root {
@@ -22,16 +17,39 @@ body {
 	--grey2: #787878;
 }
 
-.btn {
-	border: none;
-	outline: none;
-}
-
-a {
-	text-decoration: none;
-}
-
 input,
 button {
 	outline: none;
+} 
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --primary: #1e88e5;
+  --primary-dark: #0277bd;
+  --accent: #f9ac2f;
+  --on-light: #232323;
+  --on-dark: #ffffff;
+  --shadow: rgba(0, 0, 0, 0.25);
+  --grey1: #c4c4c4;
+  --grey2: #787878;
+}
+
+.btn {
+  border: none;
+  outline: none;
+  cursor: pointer;
+  transition: transform 0.35s ease;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+}
+
+a {
+  text-decoration: none;
 }

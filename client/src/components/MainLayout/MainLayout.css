@@ -7,14 +7,14 @@
     grid-template-areas: "sidebar searchbar" "sidebar pagecontent";
 }
 
-#main-layout #sidebar{
-    grid-area: sidebar;
+#main-layout #sidebar {
+  grid-area: sidebar;
 }
 
-#main-layout #searchbar{
-    grid-area: searchbar;
+#main-layout #searchbar {
+  grid-area: searchbar;
 }
 
-#main-layout .content{
-    grid-area: pagecontent;
+#main-layout .content {
+  grid-area: pagecontent;
 }
