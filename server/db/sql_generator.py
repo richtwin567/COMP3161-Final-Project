@@ -688,9 +688,9 @@ def generate_user_allergies(no_users):
     no_allergies = len(ALLERGIES)
 
     # Assuming half of the users have allergies
-    user_ids = list(range(1, (no_users//2)))
+    user_ids = list(range(1, (no_users//2)+1))
 
-    for _ in range(1, (no_users//2)):
+    for _ in range(1, (no_users//2)+1):
 
         # Randomly assign allergies to users
         allergy_id = random.randint(1, no_allergies)
@@ -698,7 +698,7 @@ def generate_user_allergies(no_users):
         user_ids.pop(user_ids.index(user_id))  # Prevent duplicates
 
         # Create the insert list
-        allergy_data = [allergy_id, user_id]
+        allergy_data = [user_id, allergy_id]
         value_lists.append(allergy_data)
 
     insert_statement = insert_all("user_allergy", value_lists)
@@ -716,12 +716,12 @@ def generate_measurment_inserts():
     """
     # Initializing key variables
     value_lists = []
-    for value in range(len(UNITS)):
+    for value in range(1,len(UNITS)+1):
 
         # Randomly generate measurement values
         measurement_id = value
         #amount = random.uniform(2, 500)
-        unit = random.choice(UNITS)
+        unit = UNITS[value-1]
 
         # Craete the insert list
         measurement_data = [measurement_id, unit]
@@ -747,7 +747,7 @@ def generate_in_stock_data(no_users):
     # Initializing key variables
     value_lists = []
     no_ingredients = len(INGREDIENTS)
-    for user_id in range(1, no_users):
+    for user_id in range(1, no_users+1):
         for ingredient_id in range(1, no_ingredients):
             ingredient_amt = random.randint(0, 50)
 
@@ -770,18 +770,20 @@ def generate_instruction_data(faker_obj, no_recipes):
     """
     # Initializing key variables
     value_lists = []
-    for instruction_id in range(1, no_recipes):
+    instruction_id =1
+    for recipe in range(1, no_recipes+1):
         recipe_id = random.randint(1, no_recipes)
 
         # Generate random instructions
         no_steps = random.randint(2, 6)
         instruction_list = [faker_obj.paragraph()] * no_steps
         for step in range(1, no_steps+1):
-            instruction_details = instruction_list[step]
+            instruction_details = instruction_list[step-1]
 
             # Generate the insert list
             instruction_data = [instruction_id,
                                 step, instruction_details, recipe_id]
+            instruction_id+=1
             value_lists.append(instruction_data)
 
     insert_statement = insert_all("instruction", value_lists)
@@ -1265,7 +1267,6 @@ FROM
             instr.step_number,
             instr.instruction_details
         FROM recipe r JOIN instruction instr ON instr.recipe_id=r.recipe_id
-        GROUP BY r.recipe_id
     ) ri
     ON ri.recipe_id=rimj.recipe_id
 """))
@@ -1559,6 +1560,13 @@ procedures.append(create_procedure("get_user_shopping_list","""
         parameter(Direction.IN, "user_id", integer())
     ]))
 
+procedures.append(create_procedure("get_one_user","""
+    SELECT * FROM user_allergy_joined WHERE user_id=uid;
+    """,
+    [
+        parameter(Direction.IN,"uid",integer())
+    ]))
+
 ##### END DB CREATION #####
 
 def print_info(msg):
@@ -1598,6 +1606,9 @@ if __name__ == "__main__":
         file_handler.write(procedure)
 
     print_done("Procedures created")
+    
+    no_users =50
+    no_recipes=50
 
     print_info("Generating allergies data...")
     allergies_data = generate_allergies_data()
@@ -1608,19 +1619,35 @@ if __name__ == "__main__":
     print_done("Ingredients data generated")
 
     print_info("Generating user data...")
-    user_data = generate_user_data(50, fake)
+    user_data = generate_user_data(no_users, fake)
     print_done("User data generated")
 
     print_info("Generating recipe data...")
-    recipe_data = generate_recipe_data(50, 50, fake)
+    recipe_data = generate_recipe_data(no_recipes,no_users, fake)
     print_done("Recipe data generated")
 
     print_info("Generating ingredient allergies data...")
     ingredient_allergies = generate_ingredient_allergies()
     print_done("Ingredient allergies data generated")
 
+    print_info("Generating instruction data...")
+    instruction_data = generate_instruction_data(fake,no_recipes)
+    print_done("Instruction data generated")
+
+    print_info("Generating in stock data...")
+    in_stock_data = generate_in_stock_data(no_users)
+    print_done("In stock data generated")
+
+    print_info("Generating measurement data...")
+    measurement_data = generate_measurment_inserts()
+    print_done("Measurement data generated")
+
+    print_info("Generating user allergy data...")
+    user_allergies = generate_user_allergies(no_users)
+    print_done("User allergy data generated")
+
     data_lst = [user_data, recipe_data, ingredients_data,
-                allergies_data, ingredient_allergies]
+                allergies_data, ingredient_allergies,instruction_data, in_stock_data, measurement_data, user_allergies]
 
     for data_str in data_lst:
         file_handler.write(data_str)
@@ -1629,9 +1656,11 @@ if __name__ == "__main__":
 
     # close file
     file_handler.close()
+
+    # print time stats
     end = datetime.now()
     total_time = end-start
     hours, remainder = divmod(total_time.total_seconds(),3600)
     minutes, remainder =divmod(remainder, 60)
     seconds, milliseconds = divmod(remainder, 1000)
-    print(f"Finished in {int(hours)} hrs, {int(minutes)} min, {int(seconds)} s, {milliseconds} ms")
+    print(f"Finished in {int(hours)}hrs, {int(minutes)}min, {int(seconds)}s, {milliseconds}ms")
