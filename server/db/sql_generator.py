@@ -1,6 +1,6 @@
 from faker import Faker
 from faker.providers import BaseProvider
-from datetime import datetime
+from datetime import datetime, timedelta
 import random
 
 
@@ -264,6 +264,7 @@ END //
 DELIMITER ;
 """
 
+
 def create_view(view_name, select_query):
     """
     Creates a new view
@@ -271,10 +272,10 @@ def create_view(view_name, select_query):
     Args:
         view_name(str):
             The name of the view
-        
+
         select_query(str):
             The query for the view
-    
+
     Returns:
         str: the create view statement
     """
@@ -285,7 +286,6 @@ AS
 {select_query};
     """
 
-    
 
 ##### END CREATE QUERIES ######
 
@@ -351,7 +351,7 @@ def insert_one(table_name, value_list):
     else:
         insert_value += f"{ value_list[-1] }"
 
-    return "INSERT INTO {0} VALUES ({1});".format(table_name, insert_value)
+    return "\nINSERT INTO {0} VALUES ({1});".format(table_name, insert_value)
 
 
 ##### CUSTOM GENERATORS #####
@@ -501,18 +501,21 @@ TIME_OF_DAY = [
 
 ##### CUSTOM PROVIDERS #####
 
+
 class RecipeProvider(BaseProvider):
     def recipe_name(self):
         c_adjectives = random.choices(ADJECTIVES, k=2)
-        while c_adjectives[0]==c_adjectives[1]:
+        while c_adjectives[0] == c_adjectives[1]:
             c_adjectives = random.choices(ADJECTIVES, k=2)
         c_foods = random.choices(FOODS, k=2)
-        while c_foods[0]==c_foods[1]:
-            c_foods = random.choices(FOODS, k=2)        
+        while c_foods[0] == c_foods[1]:
+            c_foods = random.choices(FOODS, k=2)
 
-        name_parts = [c_adjectives[0], random.choice(CONJUNCTIONS), c_adjectives[1], c_foods[0], random.choice(CONJUNCTIONS), c_foods[1]]
-        name = [ part for part in name_parts if part!=""]
+        name_parts = [c_adjectives[0], random.choice(
+            CONJUNCTIONS), c_adjectives[1], c_foods[0], random.choice(CONJUNCTIONS), c_foods[1]]
+        name = [part for part in name_parts if part != ""]
         return " ".join(name)
+
 
 fake.add_provider(RecipeProvider)
 
@@ -558,11 +561,10 @@ def generate_recipe_data(no_entries, no_users, faker_obj):
         description = faker_obj.paragraph()
         recipe_name = faker_obj.unique.recipe_name()
 
-        
         created_by = random.randint(1, no_users)
 
         # Create the insert list
-        recipe_lst = [recipe_id, recipe_name,img_url, prep_time, cook_time,
+        recipe_lst = [recipe_id, recipe_name, img_url, prep_time, cook_time,
                       creation_date, culture, description,
                       created_by]
 
@@ -616,7 +618,7 @@ def generate_ingredients_data():
 
         # Pull from the ingredients array
         ingredient_id = value+1
-        #stock_quantity = random.randint(0, 200)  # Randomize the quantity
+        # stock_quantity = random.randint(0, 200)  # Randomize the quantity
         ingredient_name = INGREDIENTS[value]
         calorie_count = random.randint(0, 2500)
 
@@ -666,7 +668,7 @@ def generate_ingredient_allergies():
     value_lists = []
     no_allergies = len(ALLERGIES)
 
-    for value in range(1, len(INGREDIENTS)):
+    for value in range(1, len(INGREDIENTS)+1):
 
         # Randomly assign allergies
         allergy_id = random.randint(1, no_allergies)
@@ -722,7 +724,7 @@ def generate_measurment_inserts():
     """
     # Initializing key variables
     value_lists = []
-    for value in range(1,len(UNITS)+1):
+    for value in range(1, len(UNITS)+1):
 
         # Randomly generate measurement values
         measurement_id = value
@@ -776,7 +778,7 @@ def generate_instruction_data(faker_obj, no_recipes):
     """
     # Initializing key variables
     value_lists = []
-    instruction_id =1
+    instruction_id = 1
     for recipe in range(1, no_recipes+1):
         recipe_id = random.randint(1, no_recipes)
 
@@ -789,38 +791,39 @@ def generate_instruction_data(faker_obj, no_recipes):
             # Generate the insert list
             instruction_data = [instruction_id,
                                 step, instruction_details, recipe_id]
-            instruction_id+=1
+            instruction_id += 1
             value_lists.append(instruction_data)
 
     insert_statement = insert_all("instruction", value_lists)
     return insert_statement
 
+
 def generate_recipe_measurement(no_recipes, faker_obj):
     """
     Creates the INSERT queries for recipe_ingreient_measurement table.
     Generates recipe ingredients and 
-    
+
     Args:
         no_recipes(int):
             The total number of recipes in the database
-    
+
     Returns:
         str: The insert statement string
     """
 
     no_ing = len(INGREDIENTS)
     no_measurements = len(UNITS)
-    value_lists=[]
-    for rid in range(1,no_recipes+1):
-        no_items = random.randint(1,7)
+    value_lists = []
+    for rid in range(1, no_recipes+1):
+        no_items = random.randint(1, 7)
         for _ in range(no_items):
-            ing_id = faker_obj.unique.random_int(1,no_ing)
-            m_id = random.randint(1,no_measurements)
-            amount = round(random.uniform(1,5), random.randint(0,2))
-            values = [rid,ing_id,m_id,amount]
+            ing_id = faker_obj.unique.random_int(1, no_ing)
+            m_id = random.randint(1, no_measurements)
+            amount = round(random.uniform(1, 5), random.randint(0, 2))
+            values = [rid, ing_id, m_id, amount]
             value_lists.append(values)
         faker_obj.unique.clear()
-    
+
     return insert_all("recipe_ingredient_measurement", value_lists)
 
 
@@ -838,9 +841,10 @@ def generate_meal_plans(no_users):
 
     value_lists = []
     for id in range(1, no_users+1):
-        value_lists.append([id,id])
+        value_lists.append([id, id])
 
-    return insert_all("meal_plan",value_lists)
+    return insert_all("meal_plan", value_lists)
+
 
 def generate_planned_meals(no_users, no_recipes):
     """
@@ -857,22 +861,22 @@ def generate_planned_meals(no_users, no_recipes):
         str: The insert statement
     """
 
-    meal_id =1
-    value_lists=[]
+    meal_id = 1
+    value_lists = []
     for plan_id in range(1, no_users+1):
         for weekday in range(7):
             for tday in TIME_OF_DAY:
-                recipe_id = random.randint(1,no_recipes)
-                serving_size = random.randint(1,6)
-                values = [meal_id,tday,serving_size,recipe_id, plan_id]
-                meal_id+=1
+                recipe_id = random.randint(1, no_recipes)
+                serving_size = random.randint(1, 6)
+                values = [meal_id, tday, serving_size, recipe_id, plan_id]
+                meal_id += 1
                 value_lists.append(values)
-    
+
     return insert_all("planned_meal", value_lists)
 
 
 ##### END CUSTOM GENERATORS #####
-    
+
 
 ##### DB CREATION #####
 
@@ -897,22 +901,24 @@ tables.append(create_table("allergy",
                                      auto_increment=True),
                                field("allergy_name", string())
                            ],
-                           [primary_key("allergy_id"), unique_key("allergy_name")]
+                           [primary_key("allergy_id"),
+                            unique_key("allergy_name")]
                            ))
 
 
 # ingredient table
 tables.append(create_table("ingredient",
-    [
-        field("ingredient_id", integer(), auto_increment=True),
-        field("ingredient_name", string()),
-        field("calorie_count", integer())
-    ],                          
-    [
-        primary_key("ingredient_id"),
-        unique_key("ingredient_name")
-    ]
-))
+                           [
+                               field("ingredient_id", integer(),
+                                     auto_increment=True),
+                               field("ingredient_name", string()),
+                               field("calorie_count", integer())
+                           ],
+                           [
+                               primary_key("ingredient_id"),
+                               unique_key("ingredient_name")
+                           ]
+                           ))
 
 
 # measurement table
@@ -963,7 +969,7 @@ tables.append(create_table("recipe",
                                primary_key("recipe_id"),
                                foreign_key("created_by", "user",
                                            "user_id", False),
-                                           unique_key("recipe_name")
+                               unique_key("recipe_name")
                            ]))
 
 
@@ -994,7 +1000,8 @@ tables.append(create_table("instruction",
                            [
                                primary_key("instruction_id"),
                                foreign_key("recipe_id", "recipe", "recipe_id"),
-                               unique_key(["instruction_id", "step_number", "instruction_details", "recipe_id"])
+                               unique_key(
+                                   ["instruction_id", "step_number", "instruction_details", "recipe_id"])
                            ]))
 
 
@@ -1079,10 +1086,10 @@ tables.append(create_table("in_stock",
 
 # build views
 
-views=[]
+views = []
 
 
-views.append(create_view("user_allergy_joined","""
+views.append(create_view("user_allergy_joined", """
 SELECT
     u.user_id,
     jua.allergy_id,
@@ -1106,7 +1113,7 @@ FROM
     ON jua.user_id=u.user_id
 """))
 
-views.append(create_view("user_allergy_joined_agg","""
+views.append(create_view("user_allergy_joined_agg", """
 SELECT
     u.user_id,
     u.username,
@@ -1148,7 +1155,7 @@ FROM
     ON jia.ingredient_id=i.ingredient_id
 """))
 
-views.append(create_view("ingredient_allergy_joined_agg","""
+views.append(create_view("ingredient_allergy_joined_agg", """
 SELECT
     ingredient_id,
     ingredient_name,
@@ -1199,7 +1206,7 @@ FROM
     ON si.user_id=u.user_id
 """))
 
-views.append(create_view("user_in_stock_joined_agg","""
+views.append(create_view("user_in_stock_joined_agg", """
 SELECT 
     u.user_id,
     u.username,
@@ -1244,7 +1251,7 @@ FROM
 """))
 
 
-views.append(create_view("ingredient_measurement_joined","""
+views.append(create_view("ingredient_measurement_joined", """
 SELECT 
     rimj.ingredient_id,
     rimj.ingredient_name,
@@ -1276,7 +1283,7 @@ FROM
     ON rimj.measurement_id=m.measurement_id
 """))
 
-views.append(create_view("ingredient_measurement_joined_agg","""
+views.append(create_view("ingredient_measurement_joined_agg", """
 SELECT
     im.recipe_id,
     SUM(im.calorie_count) total_calories,
@@ -1307,7 +1314,7 @@ FROM instruction
 GROUP BY recipe_id
 """))
 
-views.append(create_view("all_recipes","""
+views.append(create_view("all_recipes", """
 SELECT 
     ri.recipe_id,
     ri.recipe_name,
@@ -1351,7 +1358,7 @@ FROM
     ON ri.recipe_id=rimj.recipe_id
 """))
 
-views.append(create_view("all_recipes_agg","""
+views.append(create_view("all_recipes_agg", """
 SELECT 
     ri.recipe_id,
     ri.recipe_name,
@@ -1386,7 +1393,7 @@ FROM
     GROUP BY ri.recipe_id
 """))
 
-views.append(create_view("planned_meal_recipe_joined","""
+views.append(create_view("planned_meal_recipe_joined", """
 SELECT 
     a.recipe_id,
     a.recipe_name,
@@ -1417,7 +1424,7 @@ FROM
 """))
 
 
-views.append(create_view("planned_meal_recipe_joined_agg","""
+views.append(create_view("planned_meal_recipe_joined_agg", """
 SELECT
     a.recipe_id,
     a.recipe_name,
@@ -1501,7 +1508,7 @@ FROM
 """))
 
 
-views.append(create_view("shopping_lists","""
+views.append(create_view("shopping_lists", """
 SELECT
     pa.for_user,
     u.username,
@@ -1632,37 +1639,60 @@ procedures.append(create_procedure("get_user_meal_plan", """
     """,
                                    [parameter(Direction.IN, "uid", integer())]))
 
-procedures.append(create_procedure("get_user_shopping_list","""
+procedures.append(create_procedure("get_user_shopping_list", """
     SELECT *
     FROM shopping_lists s WHERE s.for_user=user_id;
     """,
-    [
-        parameter(Direction.IN, "user_id", integer())
-    ]))
+                                   [
+                                       parameter(Direction.IN,
+                                                 "user_id", integer())
+                                   ]))
 
-procedures.append(create_procedure("get_one_user","""
+procedures.append(create_procedure("get_one_user", """
     SELECT * FROM user_allergy_joined WHERE user_id=uid;
     """,
-    [
-        parameter(Direction.IN,"uid",integer())
-    ]))
+                                   [
+                                       parameter(Direction.IN,
+                                                 "uid", integer())
+                                   ]))
 
 ##### END DB CREATION #####
 
+
 def print_info(msg):
+    """
+    Prints a message and returns to the start of the line
+    """
     print(msg, end="\r")
 
+
 def print_done(msg):
+    """
+    Prints a message indicating that the job is finished.
+    Clears the line first and prints a green tick in front of the message
+    """
     print("\033[2K\033[32m\u2713\033[0m "+msg)
 
 
+def format_time_elapsed(ttime: timedelta):
+    def get_time_elapsed(t: timedelta):
+        hours, remainder = divmod(t.total_seconds(), 3600)
+        minutes, remainder = divmod(remainder, 60)
+        seconds, milliseconds = divmod(remainder, 1000)
+
+        return int(hours), int(minutes), int(seconds), milliseconds
+
+    hrs, m, s, ms = get_time_elapsed(ttime)
+    return f"""{f"{hrs}hrs, " if hrs else ""}{f"{m}min, " if m else ""}{f"{s}s, " if s else ""}{ms}ms"""
+
 ##### DB INSERT #####
+
 
 if __name__ == "__main__":
     start = datetime.now()
-    file_handler = open("sophro_db.sql", "w")
+    file_handler = open("sophro_db2.sql", "w")
 
-        # write data
+    # write data
     file_handler.write(drop_db_stmt)
 
     file_handler.write(db_create_stmt)
@@ -1686,9 +1716,9 @@ if __name__ == "__main__":
         file_handler.write(procedure)
 
     print_done("Procedures created")
-    
-    no_users =50
-    no_recipes=50
+
+    no_users = 200000
+    no_recipes = 600000
 
     print_info("Generating allergies data...")
     allergies_data = generate_allergies_data()
@@ -1703,7 +1733,7 @@ if __name__ == "__main__":
     print_done("User data generated")
 
     print_info("Generating recipe data...")
-    recipe_data = generate_recipe_data(no_recipes,no_users, fake)
+    recipe_data = generate_recipe_data(no_recipes, no_users, fake)
     print_done("Recipe data generated")
 
     print_info("Generating ingredient allergies data...")
@@ -1711,7 +1741,7 @@ if __name__ == "__main__":
     print_done("Ingredient allergies data generated")
 
     print_info("Generating instruction data...")
-    instruction_data = generate_instruction_data(fake,no_recipes)
+    instruction_data = generate_instruction_data(fake, no_recipes)
     print_done("Instruction data generated")
 
     print_info("Generating in stock data...")
@@ -1735,12 +1765,11 @@ if __name__ == "__main__":
     print_done("Meal plans generated")
 
     print_info("Generating planned meals...")
-    planned_meal_data = generate_planned_meals(no_users,no_recipes)
+    planned_meal_data = generate_planned_meals(no_users, no_recipes)
     print_done("Planned meals generated")
 
-
     data_lst = [user_data, recipe_data, ingredients_data,
-                allergies_data, ingredient_allergies,instruction_data, in_stock_data, measurement_data, user_allergies, recipe_ingredients, meal_plan_data, planned_meal_data]
+                allergies_data, ingredient_allergies, instruction_data, in_stock_data, measurement_data, user_allergies, recipe_ingredients, meal_plan_data, planned_meal_data]
 
     for data_str in data_lst:
         file_handler.write(data_str)
@@ -1753,7 +1782,4 @@ if __name__ == "__main__":
     # print time stats
     end = datetime.now()
     total_time = end-start
-    hours, remainder = divmod(total_time.total_seconds(),3600)
-    minutes, remainder =divmod(remainder, 60)
-    seconds, milliseconds = divmod(remainder, 1000)
-    print(f"Finished in {int(hours)}hrs, {int(minutes)}min, {int(seconds)}s, {milliseconds}ms")
+    print(f"Finished in {format_time_elapsed(total_time)}")
