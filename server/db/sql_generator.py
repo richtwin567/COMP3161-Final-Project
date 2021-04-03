@@ -493,6 +493,12 @@ UNITS = [
 ]
 
 
+TIME_OF_DAY = [
+    "Breakfast",
+    "Lunch",
+    "Dinner"
+]
+
 ##### CUSTOM PROVIDERS #####
 
 class RecipeProvider(BaseProvider):
@@ -789,10 +795,84 @@ def generate_instruction_data(faker_obj, no_recipes):
     insert_statement = insert_all("instruction", value_lists)
     return insert_statement
 
+def generate_recipe_measurement(no_recipes, faker_obj):
+    """
+    Creates the INSERT queries for recipe_ingreient_measurement table.
+    Generates recipe ingredients and 
+    
+    Args:
+        no_recipes(int):
+            The total number of recipes in the database
+    
+    Returns:
+        str: The insert statement string
+    """
+
+    no_ing = len(INGREDIENTS)
+    no_measurements = len(UNITS)
+    value_lists=[]
+    for rid in range(1,no_recipes+1):
+        no_items = random.randint(1,7)
+        for _ in range(no_items):
+            ing_id = faker_obj.unique.random_int(1,no_ing)
+            m_id = random.randint(1,no_measurements)
+            amount = round(random.uniform(1,5), random.randint(0,2))
+            values = [rid,ing_id,m_id,amount]
+            value_lists.append(values)
+        faker_obj.unique.clear()
+    
+    return insert_all("recipe_ingredient_measurement", value_lists)
+
+
+def generate_meal_plans(no_users):
+    """
+    Creates the insert queries for the meal_plan table
+
+    Args:
+        no_users(int):
+            The number of users in the database
+
+    Returns:
+        str: The insert statement
+    """
+
+    value_lists = []
+    for id in range(1, no_users+1):
+        value_lists.append([id,id])
+
+    return insert_all("meal_plan",value_lists)
+
+def generate_planned_meals(no_users, no_recipes):
+    """
+    Creates the insert statements for the planned meal table
+
+    Args:
+        no_users(int):
+            The number of users in the database
+
+        no_recipes(int):
+            The number of recipes in the database
+
+    Returns:
+        str: The insert statement
+    """
+
+    meal_id =1
+    value_lists=[]
+    for plan_id in range(1, no_users+1):
+        for weekday in range(7):
+            for tday in TIME_OF_DAY:
+                recipe_id = random.randint(1,no_recipes)
+                serving_size = random.randint(1,6)
+                values = [meal_id,tday,serving_size,recipe_id, plan_id]
+                meal_id+=1
+                value_lists.append(values)
+    
+    return insert_all("planned_meal", value_lists)
+
 
 ##### END CUSTOM GENERATORS #####
-def generate_recipe_measurement():
-    pass
+    
 
 ##### DB CREATION #####
 
@@ -1646,8 +1726,21 @@ if __name__ == "__main__":
     user_allergies = generate_user_allergies(no_users)
     print_done("User allergy data generated")
 
+    print_info("Generating the recipe ingredients and measurements data...")
+    recipe_ingredients = generate_recipe_measurement(no_recipes, fake)
+    print_done("Recipe ingredients and measurements data generated")
+
+    print_info("Generating meal plan data...")
+    meal_plan_data = generate_meal_plans(no_users)
+    print_done("Meal plans generated")
+
+    print_info("Generating planned meals...")
+    planned_meal_data = generate_planned_meals(no_users,no_recipes)
+    print_done("Planned meals generated")
+
+
     data_lst = [user_data, recipe_data, ingredients_data,
-                allergies_data, ingredient_allergies,instruction_data, in_stock_data, measurement_data, user_allergies]
+                allergies_data, ingredient_allergies,instruction_data, in_stock_data, measurement_data, user_allergies, recipe_ingredients, meal_plan_data, planned_meal_data]
 
     for data_str in data_lst:
         file_handler.write(data_str)
