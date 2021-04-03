@@ -1,10 +1,11 @@
 import React, { useState } from "react";
 import SearchBar from "../SearchBar/SearchBar";
 import SideBar from "../SideBar/SideBar";
-import "./MainLayout.css"
+import "./MainLayout.css";
 
 export default function MainLayout(props) {
 	const [selected, setSelected] = useState(0);
+	const [searchMode, setSearchMode] = useState(false);
 
 	return (
 		<div id="main-layout">
@@ -13,8 +14,7 @@ export default function MainLayout(props) {
 				selected={selected}
 				setSelected={setSelected}
 			/>
-			<SearchBar/>
-			
+			<SearchBar searching={searchMode} setSearchMode={setSearchMode} />
 		</div>
 	);
 }

@@ -1,4 +1,5 @@
 from faker import Faker
+from faker.providers import BaseProvider
 from datetime import datetime
 import random
 
@@ -63,7 +64,7 @@ def enum(values):
     return f"""ENUM({", ".join(values)})"""
 
 
-def time():
+def sql_time():
     """
     The time data type
     """
@@ -263,6 +264,29 @@ END //
 DELIMITER ;
 """
 
+def create_view(view_name, select_query):
+    """
+    Creates a new view
+
+    Args:
+        view_name(str):
+            The name of the view
+        
+        select_query(str):
+            The query for the view
+    
+    Returns:
+        str: the create view statement
+    """
+
+    return f"""
+CREATE VIEW {view_name}
+AS
+{select_query};
+    """
+
+    
+
 ##### END CREATE QUERIES ######
 
 ##### TABLE RECORD MODFICATION QUERIES ######
@@ -330,6 +354,7 @@ def insert_one(table_name, value_list):
 
 
 ##### CUSTOM GENERATORS #####
+fake = Faker()
 
 
 CONJUNCTIONS = ["and", ""]
@@ -367,7 +392,11 @@ ADJECTIVES = [
     "Creamy",
     "Crisp,"
     "Crunchy",
-    "Gourmet"
+    "Gourmet",
+    "Tasty",
+    "Yummy",
+    "Juicy",
+    "Roasted"
 ]
 
 FOODS = [
@@ -383,7 +412,7 @@ FOODS = [
     "Icecream",
     "Muffin",
     "Beef Lasagne",
-    "Shepard's Pie",
+    "Shepards Pie",
     "Cornmeal Porridge",
     "Bread",
     "Brownies",
@@ -420,7 +449,6 @@ INGREDIENTS = [
     "ham",
     "baking powder",
     "eggs",
-    "all-purpose flour",
     "raisins",
     "milk",
     "white sugar"
@@ -440,7 +468,16 @@ ALLERGIES = [
     "Lactose intolerance",
     "Shellfish Allergy",
     "Sugar Allergy / Intolerance",
-    "Procrastination Allergy"
+    "Procrastination Allergy",
+    "Soy allergy",
+    "Caffine Sensitivity",
+    "FODMAPs Sensitivity",
+    "Sulfite Sensitivity",
+    "Fructose Sensitivity",
+    "Aspartame Sensitivity",
+    "Egg Sensitivity",
+    "MSG Sensitivity",
+    "Yeast Allergy",
 ]
 
 UNITS = [
@@ -450,17 +487,31 @@ UNITS = [
     "tbsp",
     "ml",
     "g",
-    "gallon"
+    "gallon",
+    "quarts"
 ]
 
+
+##### CUSTOM PROVIDERS #####
+
+class RecipeProvider(BaseProvider):
+    def recipe_name(self):
+        c_adjectives = random.choices(ADJECTIVES, k=2)
+        while c_adjectives[0]==c_adjectives[1]:
+            c_adjectives = random.choices(ADJECTIVES, k=2)
+        c_foods = random.choices(FOODS, k=2)
+        while c_foods[0]==c_foods[1]:
+            c_foods = random.choices(FOODS, k=2)        
+
+        name_parts = [c_adjectives[0], random.choice(CONJUNCTIONS), c_adjectives[1], c_foods[0], random.choice(CONJUNCTIONS), c_foods[1]]
+        name = [ part for part in name_parts if part!=""]
+        return " ".join(name)
+
+fake.add_provider(RecipeProvider)
+
+##### END CUSTOM PROVIDERS #####
+
 # Utility Functions
-
-
-def random_recipe_name():
-    c_adjectives = random.choices(ADJECTIVES, k=2)
-    c_foods = random.choices(FOODS, k=2)
-
-    return " ".join([c_adjectives[0], random.choice(CONJUNCTIONS), c_adjectives[1], c_foods[0], random.choice(CONJUNCTIONS), c_foods[1]])
 
 
 def random_time():
@@ -474,7 +525,7 @@ def random_time():
 # Functions to generate the insert statements
 
 
-def generate_recipe_data(no_entries, faker_obj):
+def generate_recipe_data(no_entries, no_users, faker_obj):
     """Creates the INSERT queries for the Recipe table
 
     Args:
@@ -498,16 +549,14 @@ def generate_recipe_data(no_entries, faker_obj):
 
         culture = faker_obj.language_name()
         description = faker_obj.paragraph()
-        recipe_name = random_recipe_name()
+        recipe_name = faker_obj.unique.recipe_name()
 
-        if no_entries > 600000:  # Temporary solution
-            created_by = random.randint(0, 200000)
-        else:
-            created_by = random.randint(1, no_entries)
+        
+        created_by = random.randint(1, no_users)
 
         # Create the insert list
-        recipe_lst = [recipe_id, img_url, prep_time, cook_time,
-                      creation_date, culture, description, recipe_name,
+        recipe_lst = [recipe_id, recipe_name,img_url, prep_time, cook_time,
+                      creation_date, culture, description,
                       created_by]
 
         value_lists.append(recipe_lst)
@@ -560,13 +609,12 @@ def generate_ingredients_data():
 
         # Pull from the ingredients array
         ingredient_id = value+1
-        stock_quantity = random.randint(0, 200)  # Randomize the quantity
+        #stock_quantity = random.randint(0, 200)  # Randomize the quantity
         ingredient_name = INGREDIENTS[value]
         calorie_count = random.randint(0, 2500)
 
         # Create the insert list
-        ingredient_data = [ingredient_id, stock_quantity,
-                           ingredient_name, calorie_count]
+        ingredient_data = [ingredient_id, ingredient_name, calorie_count]
 
         value_lists.append(ingredient_data)
 
@@ -574,7 +622,7 @@ def generate_ingredients_data():
     return insert_statement
 
 
-def generate_allergies_data(no_entries, faker_obj):
+def generate_allergies_data():
     """Creates the INSERT queries for the Allergy table
 
     Args:
@@ -656,7 +704,7 @@ def generate_user_allergies(no_users):
     return insert_statement
 
 
-def generate_measurment_inserts(no_entries):
+def generate_measurment_inserts():
     """Creates the INSERT queries for the Ingredient Allergies table
 
     Args:
@@ -667,15 +715,15 @@ def generate_measurment_inserts(no_entries):
     """
     # Initializing key variables
     value_lists = []
-    for value in range(1, no_entries):
+    for value in range(len(UNITS)):
 
         # Randomly generate measurement values
         measurement_id = value
-        amount = random.uniform(2, 500)
+        #amount = random.uniform(2, 500)
         unit = random.choice(UNITS)
 
         # Craete the insert list
-        measurement_data = [measurement_id, amount, unit]
+        measurement_data = [measurement_id, unit]
         value_lists.append(measurement_data)
 
     insert_statement = insert_all("measurement", value_lists)
@@ -737,8 +785,6 @@ def generate_instruction_data(faker_obj, no_recipes):
     insert_statement = insert_all("instruction", value_lists)
     return insert_statement
 
-# Functions to create the respective tables
-
 ##### END CUSTOM GENERATORS #####
 
 ##### DB CREATION #####
@@ -747,9 +793,9 @@ def generate_instruction_data(faker_obj, no_recipes):
 
 db_name = "sophro"
 
-drop_stmt = f"DROP DATABASE IF EXISTS {db_name};\n"
+drop_db_stmt = f"DROP DATABASE IF EXISTS {db_name};\n"
 
-create_db_stmt = f"CREATE DATABASE {db_name};\n"
+db_create_stmt = f"CREATE DATABASE {db_name};\n"
 
 use_db_stmt = f"USE {db_name};\n\n"
 
@@ -772,13 +818,12 @@ tables.append(create_table("allergy",
 tables.append(create_table("ingredient",
     [
         field("ingredient_id", integer(), auto_increment=True),
-        field("stock_quantity", integer()),
-        field("name", string()),
+        field("ingredient_name", string()),
         field("calorie_count", integer())
     ],                          
     [
         primary_key("ingredient_id"),
-        unique_key("name")
+        unique_key("ingredient_name")
     ]
 ))
 
@@ -788,12 +833,11 @@ tables.append(create_table("measurement",
                            [
                                field("measurement_id", integer(),
                                      auto_increment=True),
-                               field("amount", floating_point()),
                                field("unit", string(15))
                            ],
                            [
                                primary_key("measurement_id"),
-                               unique_key(["amount", "unit"])
+                               unique_key("unit")
                            ]
                            ))
 
@@ -821,8 +865,8 @@ tables.append(create_table("recipe",
                                      auto_increment=True),
                                field("recipe_name", string()),
                                field("image_url", string()),
-                               field("prep_time", time()),
-                               field("cook_time", time()),
+                               field("prep_time", sql_time()),
+                               field("cook_time", sql_time()),
                                field("creation_date", sql_datetime()),
                                field("culture", string()),
                                field("description", string()),
@@ -872,11 +916,12 @@ tables.append(create_table("recipe_ingredient_measurement",
                            [
                                field("recipe_id", integer()),
                                field("ingredient_id", integer()),
-                               field("measurement_id", integer())
+                               field("measurement_id", integer()),
+                               field("amount", floating_point()),
                            ],
                            [
                                primary_key(
-                                   ["recipe_id", "ingredient_id", "measurement_id"]),
+                                   ["recipe_id", "ingredient_id"]),
                                foreign_key("recipe_id", "recipe", "recipe_id"),
                                foreign_key("ingredient_id",
                                            "ingredient", "ingredient_id"),
@@ -935,7 +980,7 @@ tables.append(create_table("in_stock",
                            [
                                field("user_id", integer()),
                                field("ingredient_id", integer()),
-                               field("in_stock", boolean())
+                               field("stock_quantity", integer())
                            ],
                            [
                                primary_key(["user_id", "ingredient_id"]),
@@ -944,7 +989,459 @@ tables.append(create_table("in_stock",
                                            "ingredient", "ingredient_id")
                            ]))
 
-# create procedures
+
+# build views
+
+views=[]
+
+
+views.append(create_view("user_allergy_joined","""
+SELECT
+    u.user_id,
+    jua.allergy_id,
+    jua.allergy_name,
+    u.username,
+    u.first_name,
+    u.last_name
+FROM
+    user u
+    JOIN
+        (
+            SELECT 
+                ua.allergy_id,
+                a.allergy_name,
+                ua.user_id
+            FROM
+                user_allergy ua
+                JOIN allergy a
+                ON a.allergy_id=ua.allergy_id
+        ) jua
+    ON jua.user_id=u.user_id
+"""))
+
+views.append(create_view("user_allergy_joined_agg","""
+SELECT
+    u.user_id,
+    u.username,
+    u.first_name,
+    u.last_name,
+    JSON_ARRAYAGG(
+        JSON_OBJECT(
+            'allergy_id',
+            u.allergy_id,
+            'allergy_name',
+            u.allergy_name
+        )
+    ) allergies
+FROM
+    user_allergy_joined u
+    GROUP BY u.user_id
+"""))
+
+views.append(create_view("ingredient_allergy_joined", """
+SELECT
+    i.ingredient_id,
+    jia.allergy_name,
+    jia.allergy_id,
+    i.ingredient_name,
+    i.calorie_count
+FROM
+    ingredient i
+    JOIN
+        (
+            SELECT 
+                a.allergy_name,
+                a.allergy_id,
+                ia.ingredient_id
+            FROM
+                ingredient_allergy ia
+                JOIN allergy a
+                ON a.allergy_id=ia.allergy_id
+        ) jia
+    ON jia.ingredient_id=i.ingredient_id
+"""))
+
+views.append(create_view("ingredient_allergy_joined_agg","""
+SELECT
+    ingredient_id,
+    ingredient_name,
+    calorie_count,
+    JSON_ARRAYAGG(
+        JSON_OBJECT(
+            'allergy_id',
+            allergy_id,
+            'allergy_name',
+            allergy_name
+        )
+    ) allergies
+FROM ingredient_allergy_joined
+GROUP BY ingredient_id
+"""))
+
+views.append(create_view("user_in_stock_joined", """
+SELECT 
+    u.user_id,
+    u.username,
+    u.first_name,
+    u.last_name,
+    u.allergy_id,
+    si.allergy_name,
+    si.ingredient_id,
+    si.ingredient_name,
+    si.calorie_count,
+    si.stock_quantity,
+    si.allergy_id ing_allergy_id,
+    si.allergy_name ing_allergy_name
+FROM 
+    user_allergy_joined u
+    JOIN
+        (
+            SELECT 
+                s.stock_quantity,
+                i.ingredient_id,
+                i.ingredient_name,
+                i.calorie_count,
+                i.allergy_id,
+                i.allergy_name,
+                s.user_id
+            FROM
+                in_stock s
+                JOIN ingredient_allergy_joined i
+                ON i.ingredient_id=s.ingredient_id
+        ) si
+    ON si.user_id=u.user_id
+"""))
+
+views.append(create_view("user_in_stock_joined_agg","""
+SELECT 
+    u.user_id,
+    u.username,
+    u.first_name,
+    u.last_name,
+    u.allergies,
+    JSON_ARRAYAGG(
+        JSON_OBJECT(
+            'ingredient',
+            JSON_OBJECT(
+                'ingredient_id',
+                si.ingredient_id,
+                'ingredient_name',
+                si.ingredient_name,
+                'calorie_count',
+                si.calorie_count,
+                'allergies',
+                si.allergies
+            ),
+            'stock_quantity',
+            si.stock_quantity
+        )
+    ) stock
+FROM
+    user_allergy_joined_agg u
+    JOIN
+        (
+            SELECT 
+                s.stock_quantity,
+                i.ingredient_id,
+                i.ingredient_name,
+                i.calorie_count,
+                i.allergies,
+                s.user_id
+            FROM
+                in_stock s
+                JOIN ingredient_allergy_joined_agg i
+                ON i.ingredient_id=s.ingredient_id
+        ) si
+    ON si.user_id=u.user_id
+    GROUP BY u.user_id
+"""))
+
+
+views.append(create_view("ingredient_measurement_joined","""
+SELECT 
+    rimj.ingredient_id,
+    rimj.ingredient_name,
+    m.measurement_id,
+    rimj.amount,
+    m.unit,
+    rimj.allergy_id,
+    rimj.allergy_name,
+    rimj.calorie_count,
+    rimj.recipe_id
+FROM 
+    measurement m 
+    JOIN 
+        (
+            SELECT 
+                rim.recipe_id,
+                rim.ingredient_id,
+                ing.ingredient_name,
+                ing.calorie_count,
+                rim.measurement_id,
+                rim.amount,
+                ing.allergy_id,
+                ing.allergy_name
+            FROM 
+                recipe_ingredient_measurement rim 
+                JOIN ingredient_allergy_joined ing 
+                ON ing.ingredient_id=rim.ingredient_id
+        ) rimj 
+    ON rimj.measurement_id=m.measurement_id
+"""))
+
+views.append(create_view("ingredient_measurement_joined_agg","""
+SELECT
+    im.recipe_id,
+    SUM(im.calorie_count) total_calories,
+    JSON_ARRAYAGG(
+        JSON_OBJECT(
+            'ingredient',JSON_OBJECT('ingredient_id', im.ingredient_id,'ingredient_name',im.ingredient_name, 'calore_count',im.calorie_count), 
+            'measurement', JSON_OBJECT('amount', im.amount,'unit', im.unit )
+        )
+    ) ingredients
+FROM ingredient_measurement_joined im
+GROUP BY im.recipe_id
+"""))
+
+views.append(create_view("instruction_agg", """
+SELECT
+    recipe_id,
+    JSON_ARRAYAGG(
+        JSON_OBJECT(
+            'instruction_id',
+            instruction_id,
+            'step_number',
+            step_number,
+            'instruction_details',
+            instruction_details
+        )
+    ) instructions
+FROM instruction
+GROUP BY recipe_id
+"""))
+
+views.append(create_view("all_recipes","""
+SELECT 
+    ri.recipe_id,
+    ri.recipe_name,
+    ri.image_url,
+    ri.prep_time,
+    ri.cook_time,
+    ri.creation_date,
+    ri.culture,
+    ri.description,
+    ri.created_by,
+    ri.instruction_id,
+    ri.step_number,
+    ri.instruction_details,
+    rimj.ingredient_id,
+    rimj.ingredient_name,
+    rimj.measurement_id,
+    rimj.amount,
+    rimj.unit,
+    rimj.allergy_id,
+    rimj.allergy_name,
+    rimj.calorie_count
+FROM
+    ingredient_measurement_joined rimj
+    JOIN
+    (
+        SELECT
+            r.recipe_id,
+            r.recipe_name,
+            r.image_url,
+            r.prep_time,
+            r.cook_time,
+            r.creation_date,
+            r.culture,
+            r.description,
+            r.created_by,
+            instr.instruction_id,
+            instr.step_number,
+            instr.instruction_details
+        FROM recipe r JOIN instruction instr ON instr.recipe_id=r.recipe_id
+        GROUP BY r.recipe_id
+    ) ri
+    ON ri.recipe_id=rimj.recipe_id
+"""))
+
+views.append(create_view("all_recipes_agg","""
+SELECT 
+    ri.recipe_id,
+    ri.recipe_name,
+    ri.image_url,
+    ri.prep_time,
+    ri.cook_time,
+    ri.creation_date,
+    ri.culture,
+    ri.description,
+    ri.instructions,
+    jimr.ingredients,
+    jimr.total_calories
+FROM
+    ingredient_measurement_joined_agg jimr 
+    JOIN
+    (
+        SELECT 
+            r.recipe_id, 
+            r.recipe_name,
+            r.image_url,
+            r.prep_time,
+            r.cook_time,
+            r.creation_date,
+            r.culture,
+            r.description,
+            created_by created_by_id, 
+            instr.instructions
+        FROM recipe r JOIN instruction_agg instr ON instr.recipe_id=r.recipe_id
+        GROUP BY r.recipe_id
+    ) ri
+    ON ri.recipe_id=jimr.recipe_id
+    GROUP BY ri.recipe_id
+"""))
+
+views.append(create_view("planned_meal_recipe_joined","""
+SELECT 
+    a.recipe_id,
+    a.recipe_name,
+    a.image_url,
+    a.prep_time,
+    a.cook_time,
+    a.creation_date,
+    a.culture,
+    a.description,
+    a.created_by,
+    a.instruction_id,
+    a.step_number,
+    a.instruction_details,
+    a.ingredient_id,
+    a.ingredient_name,
+    a.measurement_id,
+    a.amount,
+    a.unit,
+    a.allergy_id,
+    a.allergy_name,
+    a.calorie_count,
+    p.meal_id,
+    p.serving_size,
+    p.plan_id,
+    p.time_of_day
+FROM
+    planned_meal p JOIN all_recipes a ON p.recipe_id=a.recipe_id
+"""))
+
+
+views.append(create_view("planned_meal_recipe_joined_agg","""
+SELECT
+    a.recipe_id,
+    a.recipe_name,
+    a.image_url,
+    a.prep_time,
+    a.cook_time,
+    a.creation_date,
+    a.culture,
+    a.description,
+    a.instructions,
+    a.ingredients,
+    a.total_calories,
+    p.meal_id,
+    p.serving_size,
+    p.plan_id,
+    p.time_of_day
+FROM
+    planned_meal p JOIN all_recipes_agg a ON p.recipe_id=a.recipe_id
+"""))
+
+views.append(create_view("meal_plans_with_planned_meals", """
+SELECT
+    m.plan_id,
+    m.for_user,
+    p.recipe_id,
+    p.recipe_name,
+    p.image_url,
+    p.prep_time,
+    p.cook_time,
+    p.creation_date,
+    p.culture,
+    p.description,
+    p.created_by,
+    p.instruction_id,
+    p.step_number,
+    p.instruction_details,
+    p.ingredient_id,
+    p.ingredient_name,
+    p.measurement_id,
+    p.amount,
+    p.unit,
+    p.allergy_id,
+    p.allergy_name,
+    p.calorie_count,
+    p.meal_id,
+    p.serving_size,
+    p.time_of_day
+FROM
+    meal_plan m JOIN planned_meal_recipe_joined p ON p.plan_id=m.plan_id
+"""))
+
+views.append(create_view("meal_plans_with_planned_meals_agg", """
+SELECT 
+    m.for_user, 
+    m.plan_id,
+    JSON_ARRAYAGG(JSON_OBJECT(
+        'image_url',
+        p.image_url,
+        'recipe_name',
+        p.recipe_name,
+        'time_of_day',
+        p.time_of_day,
+        'serving_size', 
+        p.serving_size,
+        'prep_time',
+        p.prep_time,
+        'cook_time',
+        p.cook_time,
+        'creation_date',
+        p.creation_date,
+        'instructions',
+        p.instructions,
+        'ingredients',
+        p.ingredients,
+        'culture',
+        p.culture,
+        'description',
+        p.description)) planned_meals
+FROM
+    meal_plan m JOIN planned_meal_recipe_joined_agg p ON p.plan_id=m.plan_id
+"""))
+
+
+views.append(create_view("shopping_lists","""
+SELECT
+    pa.for_user,
+    u.username,
+    u.first_name,
+    u.last_name,
+    pa.ingredient_name,
+    u.stock_quantity,
+    pa.total_amount amount_needed,
+    pa.unit
+FROM
+    user_in_stock_joined u
+    JOIN 
+        (
+            SELECT
+                p.for_user,
+                p.ingredient_name,
+                SUM(p.amount) total_amount,
+                p.unit
+            FROM
+                meal_plans_with_planned_meals p
+            GROUP BY p.for_user, p.ingredient_name
+        ) pa
+    ON pa.for_user=u.user_id
+GROUP BY pa.for_user, pa.ingredient_name
+"""))
+# build procedures
 
 procedures = []
 
@@ -958,9 +1455,9 @@ procedures.append(create_procedure("insert_recipe", """
                                        parameter(Direction.IN,
                                                  "mew_image_url", string()),
                                        parameter(Direction.IN,
-                                                 "new_prep_time", time()),
+                                                 "new_prep_time", sql_time()),
                                        parameter(Direction.IN,
-                                                 "new_cook_time", time()),
+                                                 "new_cook_time", sql_time()),
                                        parameter(
                                            Direction.IN, "new_creation_date", sql_datetime()),
                                        parameter(Direction.IN,
@@ -1004,7 +1501,7 @@ procedures.append(create_procedure("insert_user", """
                                                  "new_id", integer())
                                    ]))
 
-# procedure to insert user and return inserted record id
+# procedure to insert user with an allergy and return inserted record id
 procedures.append(create_procedure("insert_user_with_allergy", """
     INSERT INTO user(username, first_name, last_name, password) VALUES
     (new_username, new_first_name, new_last_name, password);
@@ -1040,127 +1537,42 @@ procedures.append(create_procedure("delete_record", """
 
 # get procedures
 
-procedures.append(create_procedure("join_ingredient_measurement", """
-    DROP VIEW IF EXISTS ingredient_measurements;
-    CREATE VIEW ingredient_measurements
-    AS
-    SELECT
-        rimj.recipe_id,
-        JSON_ARRAYAGG(
-            JSON_OBJECT(
-                'ingredient_name', rimj.name, 
-                'calorie_count', rimj.calorie_count, 
-                'measurement', JSON_OBJECT('amount', m.amount,'unit', m.unit )
-            )
-        ) ingredients
-    FROM 
-        measurement m 
-        JOIN 
-            (
-                SELECT * 
-                FROM 
-                    recipe_ingredient_measurement rim 
-                    JOIN ingredient ing 
-                    ON ing.ingredient_id=rim.ingredient_id
-            ) rimj 
-        ON rimj.measurement_id=m.measurement_id
-    GROUP BY rimj.recipe_id;
-    """))
-
-# Procedure to get all ingredients
-procedures.append(create_procedure("get_all_recipes", """
-    CALL join_ingredient_measurement();
-    DROP VIEW IF EXISTS all_recipes;
-    CREATE VIEW all_recipes
-    AS
-    SELECT 
-        ri.recipe_id,
-        ri.image_url,
-        ri.prep_time,
-        ri.cook_time,
-        ri.creation_date,
-        ri.culture,
-        ri.description,
-        JSON_ARRAYAGG(ri.instruction) instructions,
-        jimr.ingredients
-    FROM
-        ingredient_measurements jimr 
-        JOIN
-        (
-            SELECT 
-                r.recipe_id, 
-                r.image_url,
-                r.prep_time,
-                r.cook_time,
-                r.creation_date,
-                r.culture,
-                r.description,
-                created_by created_by_id, 
-                JSON_OBJECTAGG(instr.step_number, instr.instruction_details) instruction
-            FROM recipe r JOIN instruction instr ON instr.recipe_id=r.recipe_id
-            GROUP BY r.recipe_id
-        ) ri
-        ON ri.recipe_id=jimr.recipe_id
-        GROUP BY ri.recipe_id;
-    """))
-
-# get planned meals with recipe
-procedures.append(create_procedure("get_planned_meals_with_recipe", """
-    CALL get_all_recipes();
-    DROP VIEW IF EXISTS planned_meals_with_recipe;
-    CREATE VIEW planned_meals_with_recipe
-    AS
-    SELECT *
-    FROM
-        planned_meal p JOIN all_recipes a ON p.recipe_id=a.recipe_id;
-    """))
-
 # get a specific user's meal plan
 procedures.append(create_procedure("get_user_meal_plan", """
-    CALL get_planned_meals_with_recipe();
-    SELECT 
-        m.for_user, 
-        m.plan_id,
-        JSON_ARRAYAGG(JSON_OBJECT(
-            'image_url',
-            p.image_url,
-            'time_of_day',
-            p.time_of_day,
-            'serving_size', 
-            p.serving_size,
-            'prep_time',
-            p.prep_time,
-            'cook_time',
-            p.cook_time,
-            'creation_date',
-            p.creation_date,
-            'instructions',
-            p.instructions,
-            'ingredients',
-            p.ingredients,
-            'culture',
-            p.culture,
-            'description',
-            p.description))
+    SELECT *
     FROM
-        meal_plan m JOIN planned_meals_with_recipe p ON p.plan_id=m.plan_id
-    WHERE m.for_user=uid
-    GROUP BY m.plan_id;
+        meal_plans_with_planned_meals_agg m
+    WHERE m.for_user=uid;
     """,
                                    [parameter(Direction.IN, "uid", integer())]))
 
+procedures.append(create_procedure("get_user_shopping_list","""
+    SELECT *
+    FROM shopping_lists s WHERE s.for_user=user_id;
+    """,
+    [
+        parameter(Direction.IN, "user_id", integer())
+    ]))
 
 ##### END DB CREATION #####
+
+def print_info(msg):
+    print(msg, end="\r")
+
+def print_done(msg):
+    print("\033[2K\033[32m\u2713\033[0m "+msg)
+
 
 ##### DB INSERT #####
 
 if __name__ == "__main__":
+    start = datetime.now()
     file_handler = open("sophro_db.sql", "w")
 
         # write data
-    file_handler.write(drop_stmt)
+    file_handler.write(drop_db_stmt)
 
-    file_handler.write(create_db_stmt)
+    file_handler.write(db_create_stmt)
 
     file_handler.write(use_db_stmt)
 
@@ -1168,16 +1580,39 @@ if __name__ == "__main__":
     for table in tables:
         file_handler.write(table)
 
+    print_done("Tables created")
+
+    # write all views
+    for view in views:
+        file_handler.write(view)
+
+    print_done("Views created")
+
     # write all procedures
     for procedure in procedures:
         file_handler.write(procedure)
 
-    fake = Faker()
-    user_data = generate_user_data(10, fake)
-    recipe_data = generate_recipe_data(10, fake)
+    print_done("Procedures created")
+
+    print_info("Generating allergies data...")
+    allergies_data = generate_allergies_data()
+    print_done("Allergies data generated")
+
+    print_info("Generating ingredients data...")
     ingredients_data = generate_ingredients_data()
-    allergies_data = generate_allergies_data(10, fake)
+    print_done("Ingredients data generated")
+
+    print_info("Generating user data...")
+    user_data = generate_user_data(50, fake)
+    print_done("User data generated")
+
+    print_info("Generating recipe data...")
+    recipe_data = generate_recipe_data(50, 50, fake)
+    print_done("Recipe data generated")
+
+    print_info("Generating ingredient allergies data...")
     ingredient_allergies = generate_ingredient_allergies()
+    print_done("Ingredient allergies data generated")
 
     data_lst = [user_data, recipe_data, ingredients_data,
                 allergies_data, ingredient_allergies]
@@ -1185,6 +1620,13 @@ if __name__ == "__main__":
     for data_str in data_lst:
         file_handler.write(data_str)
 
-    # close file
+    print_done("Data inserts written to file")
 
+    # close file
     file_handler.close()
+    end = datetime.now()
+    total_time = end-start
+    hours, remainder = divmod(total_time.total_seconds(),3600)
+    minutes, remainder =divmod(remainder, 60)
+    seconds, milliseconds = divmod(remainder, 1000)
+    print(f"Finished in {int(hours)} hrs, {int(minutes)} min, {int(seconds)} s, {milliseconds} ms")

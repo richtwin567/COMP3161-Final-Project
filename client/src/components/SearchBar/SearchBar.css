@@ -1,0 +1,11 @@
+#searchbar{
+    box-shadow: var(--shadow) 0 2px  5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#searchbar input{
+    border: 1px var(--grey1) solid;
+    border-radius: 30px;
+}
