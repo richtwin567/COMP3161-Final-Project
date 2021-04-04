@@ -533,7 +533,7 @@ def random_time():
 
 
 # Functions to generate the insert statements
-
+CAP =100000
 
 def generate_recipe_data(no_entries, no_users, faker_obj):
     """Creates the INSERT queries for the Recipe table
@@ -545,6 +545,7 @@ def generate_recipe_data(no_entries, no_users, faker_obj):
         A list containing all of the insert statements
     """
     value_lists = []
+    batch =[]
     for value in range(no_entries):
 
         # Retrieve and format the current date
@@ -570,9 +571,17 @@ def generate_recipe_data(no_entries, no_users, faker_obj):
 
         value_lists.append(recipe_lst)
 
-    insert_statement = insert_all('recipe', value_lists)
+        if len(value_lists)%CAP==0:
+            insert_statement = insert_all('recipe', value_lists)
+            value_lists=[]
+            batch.append(insert_statement)
 
-    return insert_statement
+        
+    if value_lists:
+        insert_statement = insert_all('recipe', value_lists)
+        batch.append(insert_statement)
+
+    return batch
 
 
 def generate_user_data(no_entries, faker_obj):
@@ -586,6 +595,7 @@ def generate_user_data(no_entries, faker_obj):
     """
 
     value_lists = []
+    batch = []
     for value in range(no_entries):
 
         # Generate fake user data
@@ -599,9 +609,17 @@ def generate_user_data(no_entries, faker_obj):
         value_lst = [user_id, username, first_name, last_name, password]
         value_lists.append(value_lst)
 
-    insert_statement = insert_all("user", value_lists)
+        if len(value_lists)%CAP==0:
+            insert_statement = insert_all("user", value_lists)
+            value_lists=[]
+            batch.append(insert_statement)
 
-    return insert_statement
+    if value_lists:
+        insert_statement = insert_all("user", value_lists)
+        value_lists=[]
+        batch.append(insert_statement)
+
+    return batch
 
 
 def generate_ingredients_data():
@@ -614,6 +632,7 @@ def generate_ingredients_data():
         (string) A list containing the insert statement
     """
     value_lists = []
+    batch=[]
     for value in range(len(INGREDIENTS)):
 
         # Pull from the ingredients array
@@ -627,8 +646,17 @@ def generate_ingredients_data():
 
         value_lists.append(ingredient_data)
 
-    insert_statement = insert_all("ingredient", value_lists)
-    return insert_statement
+        if len(value_lists)%CAP==0:
+            insert_statement = insert_all("ingredient", value_lists)
+            value_lists=[]
+            batch.append(insert_statement)
+
+    if value_lists:
+        insert_statement = insert_all("ingredient", value_lists)
+        value_lists=[]
+        batch.append(insert_statement)
+
+    return batch
 
 
 def generate_allergies_data():
@@ -641,6 +669,7 @@ def generate_allergies_data():
         (string) A list containing the insert statement
     """
     value_lists = []
+    batch = []
     for value in range(len(ALLERGIES)):
 
         # Pull from the allergies array
@@ -651,8 +680,17 @@ def generate_allergies_data():
         allergy_data = [allergy_id, allergy_name]
         value_lists.append(allergy_data)
 
-    insert_statement = insert_all("allergy", value_lists)
-    return insert_statement
+        if len(value_lists)%CAP==0:
+            insert_statement = insert_all("allergy", value_lists)
+            value_lists=[]
+            batch.append(insert_statement)
+
+    if value_lists:
+        insert_statement = insert_all("allergy", value_lists)
+        value_lists=[]
+        batch.append(insert_statement)
+
+    return batch
 
 
 def generate_ingredient_allergies():
@@ -667,7 +705,7 @@ def generate_ingredient_allergies():
     # Initializing key variables
     value_lists = []
     no_allergies = len(ALLERGIES)
-
+    batch=[]
     for value in range(1, len(INGREDIENTS)+1):
 
         # Randomly assign allergies
@@ -678,8 +716,17 @@ def generate_ingredient_allergies():
         allergy_data = [allergy_id, ingredient_id]
         value_lists.append(allergy_data)
 
-    insert_statement = insert_all("ingredient_allergy", value_lists)
-    return insert_statement
+        if len(value_lists)%CAP==0:
+            insert_statement = insert_all("ingredient_allergy", value_lists)
+            value_lists=[]
+            batch.append(insert_statement)
+    
+    if value_lists:
+        insert_statement = insert_all("ingredient_allergy", value_lists)
+        value_lists=[]
+        batch.append(insert_statement)
+
+    return batch
 
 
 def generate_user_allergies(no_users):
@@ -694,11 +741,12 @@ def generate_user_allergies(no_users):
     # Initializing key variables
     value_lists = []
     no_allergies = len(ALLERGIES)
+    batch=[]
 
     # Assuming half of the users have allergies
     user_ids = list(range(1, (no_users//2)+1))
 
-    for _ in range(1, (no_users//2)+1):
+    for value in range(1, (no_users//2)+1):
 
         # Randomly assign allergies to users
         allergy_id = random.randint(1, no_allergies)
@@ -709,8 +757,17 @@ def generate_user_allergies(no_users):
         allergy_data = [user_id, allergy_id]
         value_lists.append(allergy_data)
 
-    insert_statement = insert_all("user_allergy", value_lists)
-    return insert_statement
+        if(len(value_lists)%CAP==0):
+            insert_statement = insert_all("user_allergy", value_lists)
+            value_lists=[]
+            batch.append(insert_statement)
+
+    if value_lists:
+        insert_statement = insert_all("user_allergy", value_lists)
+        value_lists=[]
+        batch.append(insert_statement)
+
+    return batch
 
 
 def generate_measurment_inserts():
@@ -724,6 +781,7 @@ def generate_measurment_inserts():
     """
     # Initializing key variables
     value_lists = []
+    batch=[]
     for value in range(1, len(UNITS)+1):
 
         # Randomly generate measurement values
@@ -735,8 +793,17 @@ def generate_measurment_inserts():
         measurement_data = [measurement_id, unit]
         value_lists.append(measurement_data)
 
-    insert_statement = insert_all("measurement", value_lists)
-    return insert_statement
+        if(len(value_lists)%CAP==0):
+            insert_statement = insert_all("measurement", value_lists)
+            value_lists=[]
+            batch.append(insert_statement)
+    
+    if value_lists:
+        insert_statement = insert_all("measurement", value_lists)
+        value_lists=[]
+        batch.append(insert_statement)
+
+    return batch
 
 
 # I do not recommend that we run this function with the amount of records
@@ -754,6 +821,7 @@ def generate_in_stock_data(no_users):
     """
     # Initializing key variables
     value_lists = []
+    batch= []
     no_ingredients = len(INGREDIENTS)
     for user_id in range(1, no_users+1):
         for ingredient_id in range(1, no_ingredients):
@@ -763,8 +831,17 @@ def generate_in_stock_data(no_users):
             stock_data = [user_id, ingredient_id, ingredient_amt]
             value_lists.append(stock_data)
 
-    insert_statement = insert_all("in_stock", value_lists)
-    return insert_statement
+            if len(value_lists)%CAP==0:
+                insert_statement = insert_all("in_stock", value_lists)
+                value_lists=[]
+                batch.append(insert_statement)
+
+    if value_lists:
+        insert_statement = insert_all("in_stock", value_lists)
+        value_lists=[]
+        batch.append(insert_statement)
+
+    return batch
 
 
 def generate_instruction_data(faker_obj, no_recipes):
@@ -778,6 +855,7 @@ def generate_instruction_data(faker_obj, no_recipes):
     """
     # Initializing key variables
     value_lists = []
+    batch=[]
     instruction_id = 1
     for recipe in range(1, no_recipes+1):
         recipe_id = random.randint(1, no_recipes)
@@ -794,8 +872,17 @@ def generate_instruction_data(faker_obj, no_recipes):
             instruction_id += 1
             value_lists.append(instruction_data)
 
-    insert_statement = insert_all("instruction", value_lists)
-    return insert_statement
+            if(len(value_lists)%CAP==0):
+                insert_statement = insert_all("instruction", value_lists)
+                value_lists=[]
+                batch.append(insert_statement)
+
+    if value_lists:
+        insert_statement = insert_all("instruction", value_lists)
+        value_lists=[]
+        batch.append(insert_statement)
+
+    return batch
 
 
 def generate_recipe_measurement(no_recipes, faker_obj):
@@ -814,6 +901,7 @@ def generate_recipe_measurement(no_recipes, faker_obj):
     no_ing = len(INGREDIENTS)
     no_measurements = len(UNITS)
     value_lists = []
+    batch=[]
     for rid in range(1, no_recipes+1):
         no_items = random.randint(1, 7)
         for _ in range(no_items):
@@ -822,9 +910,20 @@ def generate_recipe_measurement(no_recipes, faker_obj):
             amount = round(random.uniform(1, 5), random.randint(0, 2))
             values = [rid, ing_id, m_id, amount]
             value_lists.append(values)
+
+            if(len(value_lists)%CAP==0):
+                insert_statement = insert_all("recipe_ingredient_measurement", value_lists)
+                value_lists=[]
+                batch.append(insert_statement)
+        
         faker_obj.unique.clear()
 
-    return insert_all("recipe_ingredient_measurement", value_lists)
+    if value_lists:
+        insert_statement = insert_all("recipe_ingredient_measurement", value_lists)
+        value_lists=[]
+        batch.append(insert_statement)
+    
+    return batch
 
 
 def generate_meal_plans(no_users):
@@ -840,10 +939,21 @@ def generate_meal_plans(no_users):
     """
 
     value_lists = []
+    batch=[]
     for id in range(1, no_users+1):
         value_lists.append([id, id])
 
-    return insert_all("meal_plan", value_lists)
+        if len(value_lists)%CAP==0:
+            insert_statement = insert_all("meal_plan", value_lists)
+            value_lists=[]
+            batch.append(insert_statement)
+
+    if value_lists:
+        insert_statement = insert_all("meal_plan", value_lists)
+        value_lists=[]
+        batch.append(insert_statement)
+
+    return batch
 
 
 def generate_planned_meals(no_users, no_recipes):
@@ -863,6 +973,7 @@ def generate_planned_meals(no_users, no_recipes):
 
     meal_id = 1
     value_lists = []
+    batch = []
     for plan_id in range(1, no_users+1):
         for weekday in range(7):
             for tday in TIME_OF_DAY:
@@ -872,7 +983,17 @@ def generate_planned_meals(no_users, no_recipes):
                 meal_id += 1
                 value_lists.append(values)
 
-    return insert_all("planned_meal", value_lists)
+                if len(value_lists)%CAP==0:
+                    insert_statement = insert_all("planned_meal", value_lists)
+                    value_lists=[]
+                    batch.append(insert_statement)
+
+    if value_lists:
+        insert_statement = insert_all("planned_meal", value_lists)
+        value_lists=[]
+        batch.append(insert_statement)
+
+    return batch
 
 
 ##### END CUSTOM GENERATORS #####
@@ -1649,7 +1770,7 @@ procedures.append(create_procedure("get_user_shopping_list", """
                                    ]))
 
 procedures.append(create_procedure("get_one_user", """
-    SELECT * FROM user_allergy_joined WHERE user_id=uid;
+    SELECT * FROM user_allergy_joined_agg WHERE user_id=uid;
     """,
                                    [
                                        parameter(Direction.IN,
@@ -1671,7 +1792,11 @@ def print_done(msg):
     Prints a message indicating that the job is finished.
     Clears the line first and prints a green tick in front of the message
     """
-    print("\033[2K\033[32m\u2713\033[0m "+msg)
+    try:
+        print("\033[2K\033[32m\u2713\033[0m "+msg)
+    except UnicodeEncodeError:
+        print("\33[2K"+msg)
+
 
 
 def format_time_elapsed(ttime: timedelta):
@@ -1690,7 +1815,7 @@ def format_time_elapsed(ttime: timedelta):
 
 if __name__ == "__main__":
     start = datetime.now()
-    file_handler = open("sophro_db2.sql", "w")
+    file_handler = open("sophro_db.sql", "w")
 
     # write data
     file_handler.write(drop_db_stmt)
@@ -1771,8 +1896,9 @@ if __name__ == "__main__":
     data_lst = [user_data, recipe_data, ingredients_data,
                 allergies_data, ingredient_allergies, instruction_data, in_stock_data, measurement_data, user_allergies, recipe_ingredients, meal_plan_data, planned_meal_data]
 
-    for data_str in data_lst:
-        file_handler.write(data_str)
+    for data in data_lst:
+        for data_str in data:
+            file_handler.write(data_str)
 
     print_done("Data inserts written to file")
 
