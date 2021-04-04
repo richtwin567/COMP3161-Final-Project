@@ -1777,6 +1777,55 @@ procedures.append(create_procedure("get_one_user", """
                                                  "uid", integer())
                                    ]))
 
+procedures.append(create_procedure("get_recipe_detail","""
+    SELECT 
+        ri.recipe_id,
+        ri.recipe_name,
+        ri.image_url,
+        ri.prep_time,
+        ri.cook_time,
+        ri.creation_date,
+        ri.culture,
+        ri.description,
+        ri.created_by,
+        ri.instruction_id,
+        ri.step_number,
+        ri.instruction_details,
+        rimj.ingredient_id,
+        rimj.ingredient_name,
+        rimj.measurement_id,
+        rimj.amount,
+        rimj.unit,
+        rimj.allergy_id,
+        rimj.allergy_name,
+        rimj.calorie_count
+    FROM
+        ingredient_measurement_joined rimj
+        JOIN
+        (
+            SELECT
+                r.recipe_id,
+                r.recipe_name,
+                r.image_url,
+                r.prep_time,
+                r.cook_time,
+                r.creation_date,
+                r.culture,
+                r.description,
+                r.created_by,
+                instr.instruction_id,
+                instr.step_number,
+                instr.instruction_details
+            FROM recipe r JOIN instruction instr ON instr.recipe_id=r.recipe_id
+            WHERE r.recipe_id=rid
+        ) ri
+        ON ri.recipe_id=rimj.recipe_id
+    """,
+    [
+        parameter(Direction.IN, "rid", integer())
+    ]))
+
+
 ##### END DB CREATION #####
 
 
