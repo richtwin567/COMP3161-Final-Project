@@ -1795,7 +1795,7 @@ def print_done(msg):
     try:
         print("\033[2K\033[32m\u2713\033[0m "+msg)
     except UnicodeEncodeError:
-        print("\33[2K"+msg)
+        print("\033[2K"+msg)
 
 
 
