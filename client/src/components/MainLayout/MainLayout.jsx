@@ -2,20 +2,19 @@ import React, { useState, useContext } from "react";
 import SearchBar from "../SearchBar/SearchBar";
 import SideBar from "../SideBar/SideBar";
 import "./MainLayout.css";
-
 import { UserContext } from "context/UserContext";
 
-export default function MainLayout({ component: Component }) {
-  const [selected, setSelected] = useState(0);
+export default function MainLayout(props) {
+	const [searchMode, setSearchMode] = useState(false);
+	const { userData } = useContext(UserContext);
 
-  const { userData } = useContext(UserContext);
-  return (
-    <div id="main-layout">
-      <SideBar user={userData} selected={selected} setSelected={setSelected} />
-      <SearchBar />
-      <div class="content">
-        <Component></Component>
-      </div>
-    </div>
-  );
+	return (
+		<div id="main-layout">
+			<SideBar
+				user={userData}
+			/>
+			<SearchBar searching={searchMode} setSearchMode={setSearchMode} />
+			<div className="content"></div>
+		</div>
+	);
 }
