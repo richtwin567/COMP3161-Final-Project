@@ -1,0 +1,38 @@
+#ingredients-list-generator {
+  background: #ffffff;
+  border: 2px solid #2196f3;
+  box-sizing: border-box;
+  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+  border-radius: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  padding: 20px;
+  text-align: center;
+}
+
+#ingredients-list-generator img {
+  height: 80px;
+  margin: 10px 0;
+}
+
+#ingredients-list-generator h3 {
+  font-size: 1em;
+}
+#ingredients-list-generator p {
+  font-size: 0.8em;
+  margin: 10px 0;
+}
+
+.generator-btn {
+  background-color: var(--primary);
+  padding: 10px 20px;
+  border-radius: 5px;
+
+  color: var(--on-dark);
+}
+
+.generator-btn:hover {
+  background-color: var(--primary-dark);
+}

@@ -1,31 +1,32 @@
 @import url("https://fonts.googleapis.com/css2?family=Poppins&family=Zilla+Slab:wght@300;400;500&display=swap");
 body {
-	margin: 0;
-	font-family: Poppins;
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
+  margin: 0;
+  font-family: Poppins;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 :root {
-	--primary: #1e88e5;
-	--primary-dark: #0277bd;
-	--accent: #f9ac2f;
-	--on-light: #232323;
-	--on-dark: #ffffff;
-	--shadow: rgba(0, 0, 0, 0.25);
-	--grey1: #c4c4c4;
-	--grey2: #787878;
+  --primary: #1e88e5;
+  --primary-dark: #0277bd;
+  --accent: #f9ac2f;
+  --on-light: #232323;
+  --on-dark: #ffffff;
+  --shadow: rgba(0, 0, 0, 0.25);
+  --grey1: #c4c4c4;
+  --grey2: #787878;
 }
 
 input,
 button {
-	outline: none;
-} 
+  outline: none;
+}
 
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+  list-style-type: none;
 }
 
 :root {

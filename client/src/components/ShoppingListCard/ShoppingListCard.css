@@ -1,0 +1,22 @@
+.shopping-list-card {
+  background: #ffffff;
+  border: 2px solid #2196f3;
+  box-sizing: border-box;
+  box-shadow: 0px 4px 8px rgba(221, 204, 204, 0.08);
+  border-radius: 10px;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  padding: 5px 15px;
+  margin-bottom: 15px;
+}
+
+.shopping-list-card h4 {
+  color: var(--grey2);
+  font-size: 0.8em;
+  margin-top: 5px;
+}
+
+.shopping-list-card h1 {
+  font-size: 2em;
+}
