@@ -1,0 +1,10 @@
+#shopping-list {
+  margin: 10px 20px;
+}
+
+#shopping-list-grid {
+  margin-top: 15px;
+  display: grid;
+  grid-template-columns: 0.77fr 0.23fr;
+  grid-gap: 3em;
+}
