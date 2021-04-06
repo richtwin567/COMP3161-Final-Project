@@ -1,0 +1,10 @@
+#meal-plan-view {
+  margin: 10px 20px;
+}
+
+#meal-plan-grid {
+  margin-top: 15px;
+  display: grid;
+  grid-template-columns: 0.77fr 0.23fr;
+  grid-gap: 3em;
+}

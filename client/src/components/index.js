@@ -4,3 +4,4 @@ export { default as ShoppingListCard } from "./ShoppingListCard/ShoppingListCard
 export { default as IngredientsList } from "./IngredientsList/IngredientsList";
 export { default as IngredientsListGenerator } from "./IngredientsListGenerator/IngredientsListGenerator";
 export { default as Chip } from "./Chip/Chip";
+export { default as ProgressBar } from "./ProgressBar/ProgressBar";
