@@ -1,0 +1,87 @@
+#recipe-details {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	height: 100%;
+	padding: 1.5rem;
+}
+
+#recipe-details .details {
+	display: grid;
+	grid-template-areas:
+		"section1 image"
+		"hseparator hseparator"
+		"instructions allergyinfo"
+		"instructions tags"
+		"instructions ingredients";
+	grid-template-columns: 1fr 1fr;
+	grid-template-rows: 70% min-content min-content min-content auto;
+	gap: 2rem;
+	height: 100%;
+    overflow: auto;
+}
+
+#recipe-details .details .section-1 {
+	grid-area: section1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+#recipe-details .details .section-1 .stats {
+    display: grid;
+    grid-template-columns: 1fr min-content 1fr min-content 1fr ;
+    grid-template-rows: auto;
+}
+
+#recipe-details .details .section-1 .stats .stat-group {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#recipe-details .details .section-1 .stats .stat-group .stat-val {
+font-size: 2.5rem;
+}
+#recipe-details .details .section-1 .stats .separator {
+    background-color: var(--grey1);
+    width: 2px;
+    height: 100%;
+}
+
+#recipe-details .details .recipe-img {
+	grid-area: image;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	border-radius: 5px;
+}
+
+#recipe-details .details hr {
+	grid-area: hseparator;
+}
+
+#recipe-details .details .instructions-section {
+    grid-area: instructions;
+}
+#recipe-details .details .instructions-section .instructions {
+display: grid;
+grid-template-columns: 100%;
+grid-template-rows: 1fr;
+grid-auto-rows: 1fr;
+gap: 2.5rem;
+
+}
+
+#recipe-details .details .ingredients-section {
+	grid-area: ingredients;
+}
+
+#recipe-details .details .allergy-info {
+	grid-area: allergyinfo;
+}
+
+#recipe-details .details .tags {
+	grid-area: tags;
+}

@@ -1788,17 +1788,22 @@ procedures.append(create_procedure("get_recipe_detail","""
         ri.culture,
         ri.description,
         ri.created_by,
-        ri.instruction_id,
-        ri.step_number,
-        ri.instruction_details,
-        rimj.ingredient_id,
-        rimj.ingredient_name,
-        rimj.measurement_id,
-        rimj.amount,
-        rimj.unit,
-        rimj.allergy_id,
-        rimj.allergy_name,
-        rimj.calorie_count
+        ri.instructions,
+        JSON_ARRAYAGG(JSON_OBJECT(
+            'ingredient_id',
+            rimj.ingredient_id,
+            'ingredient_name',
+            rimj.ingredient_name,
+            'amount',
+            rimj.amount,
+            'unit',
+            rimj.unit,
+            'allergy_id',
+            rimj.allergy_id,
+            'allergy_name',
+            rimj.allergy_name,
+            'calorie_count',
+            rimj.calorie_count)) ingredient_measurements
     FROM
         ingredient_measurement_joined rimj
         JOIN
@@ -1813,13 +1818,22 @@ procedures.append(create_procedure("get_recipe_detail","""
                 r.culture,
                 r.description,
                 r.created_by,
-                instr.instruction_id,
-                instr.step_number,
-                instr.instruction_details
+                JSON_ARRAYAGG(
+                    JSON_OBJECT(
+                        'instruction_id',
+                        instr.instruction_id,
+                        'step_number',
+                        instr.step_number,
+                        'instruction_details',
+                        instr.instruction_details
+                    )
+                ) instructions
             FROM recipe r JOIN instruction instr ON instr.recipe_id=r.recipe_id
             WHERE r.recipe_id=rid
+            GROUP BY recipe_id
         ) ri
         ON ri.recipe_id=rimj.recipe_id
+        GROUP BY ri.recipe_id
     """,
     [
         parameter(Direction.IN, "rid", integer())

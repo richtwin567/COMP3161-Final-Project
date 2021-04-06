@@ -9,6 +9,7 @@ import {
 	RecipeCatalogue,
 	MealPlan,
 	PlanGenerator,
+	Recipe,
 } from "views";
 
 function RouteClient() {
@@ -34,6 +35,9 @@ function RouteClient() {
 			</Route>
 			<Route exact path="/app/logout">
 				<Redirect to="/login" />
+			</Route>
+			<Route path="/app/recipes/details/:id">
+				<MainLayout component={Recipe} />
 			</Route>
 			{/* //TODO not found*/}
 		</Switch>

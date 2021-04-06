@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import RecipeCard from "./RecipeCard/RecipeCard";
-import './RecipeCatalogue.css';
+import "./RecipeCatalogue.css";
 
 function RecipeCatalogue() {
 	const [recipes, setRecipes] = useState([]);
@@ -9,23 +9,23 @@ function RecipeCatalogue() {
 
 	useEffect(() => {
 		let isMounted = true;
-		if (isMounted) {
-			async function getRecipes(params) {
-				fetch("http://localhost:9090/recipes", {
-					method: "POST",
-					headers: {
-						"Content-Type": "application/json",
-					},
-					body: JSON.stringify({ loadMore: loadMore }),
-				})
-					.then((res) => res.json())
-					.then((data) => {
-						console.log(data);
-						setRecipes((prev) => prev.concat(data));
-					})
-					.catch((e) => console.log(e));
-			}
 
+		async function getRecipes(params) {
+			fetch("http://localhost:9090/recipes", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({ loadMore: loadMore }),
+			})
+				.then((res) => res.json())
+				.then((data) => {
+					console.log(data);
+					setRecipes((prev) => prev.concat(data));
+				})
+				.catch((e) => console.log(e));
+		}
+		if (isMounted) {
 			getRecipes();
 		}
 

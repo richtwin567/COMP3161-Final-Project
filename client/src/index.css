@@ -12,6 +12,7 @@ body {
   --primary-dark: #0277bd;
   --accent: #f9ac2f;
   --on-light: #232323;
+  --bg: #ffffff;
   --on-dark: #ffffff;
   --shadow: rgba(0, 0, 0, 0.25);
   --grey1: #c4c4c4;
@@ -35,8 +36,8 @@ button {
   outline: none;
   cursor: pointer;
   transition: transform 0.35s ease;
-  border-radius: 5px;
-  padding: 1rem 3rem;
+  border-radius: 7px;
+  padding: 0.5rem 2.5rem;
   font-weight: bold;
   display: flex;
   justify-content: center;
@@ -46,6 +47,12 @@ button {
 .btn.filled.primary{
   background-color: var(--primary);
   color: var(--on-dark);
+}
+
+.btn.outline.primary {
+  color: var(--on-light);
+  background-color: var(--bg);
+  border: var(--primary) 1px solid;
 }
 
 .btn:hover {
