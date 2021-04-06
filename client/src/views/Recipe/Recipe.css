@@ -15,39 +15,39 @@
 		"instructions tags"
 		"instructions ingredients";
 	grid-template-columns: 1fr 1fr;
-	grid-template-rows: 70% min-content min-content min-content auto;
+	grid-template-rows: 70% min-content max-content max-content auto;
 	gap: 2rem;
 	height: 100%;
-    overflow: auto;
+	overflow: auto;
 }
 
 #recipe-details .details .section-1 {
 	grid-area: section1;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
 }
 
 #recipe-details .details .section-1 .stats {
-    display: grid;
-    grid-template-columns: 1fr min-content 1fr min-content 1fr ;
-    grid-template-rows: auto;
+	display: grid;
+	grid-template-columns: 1fr min-content 1fr min-content 1fr;
+	grid-template-rows: auto;
 }
 
 #recipe-details .details .section-1 .stats .stat-group {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    align-items: center;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	align-items: center;
 }
 
 #recipe-details .details .section-1 .stats .stat-group .stat-val {
-font-size: 2.5rem;
+	font-size: 2.5rem;
 }
 #recipe-details .details .section-1 .stats .separator {
-    background-color: var(--grey1);
-    width: 2px;
-    height: 100%;
+	background-color: var(--grey1);
+	width: 2px;
+	height: 100%;
 }
 
 #recipe-details .details .recipe-img {
@@ -63,30 +63,43 @@ font-size: 2.5rem;
 }
 
 #recipe-details .details .instructions-section {
-    grid-area: instructions;
+	grid-area: instructions;
 }
+
 #recipe-details .details .instructions-section .instructions {
-display: grid;
-grid-template-columns: 100%;
-grid-template-rows: 1fr;
-grid-auto-rows: 1fr;
-gap: 2.5rem;
-
+	display: grid;
+	grid-template-columns: 100%;
+	grid-template-rows: 1fr;
+	grid-auto-rows: 1fr;
+	gap: 2.5rem;
 }
 
-#recipe-details .details .instructions-section .instructions .step-number{
-font-weight: bold;
+#recipe-details .details .instructions-section .instructions .step-number {
+	font-weight: bold;
 }
-
 
 #recipe-details .details .ingredients-section {
 	grid-area: ingredients;
+    border-radius: 25px;
+    padding: 1.5rem;
+    border: 1px var(--primary) solid;
 }
+
+#recipe-details .details .ingredients-section h3{
+    text-align: center;
+}
+
 
 #recipe-details .details .allergy-info {
 	grid-area: allergyinfo;
 }
 
-#recipe-details .details .tags {
+#recipe-details .details .tags-section {
 	grid-area: tags;
+    display: flex;
+flex-direction: column;
+}
+
+#recipe-details .details .tags-section .tags{
+    height: fit-content;
 }

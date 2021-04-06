@@ -12,7 +12,6 @@ export default function SideBar(props) {
 		{ path: "logout", label: "Logout" },
 	];
 
-	console.log(window.location.pathname);
 
 	const items = links.map((item, i) => (
 		<Link
