@@ -16,11 +16,21 @@ class AggregatedDataEncoder(json.JSONEncoder):
         
         return json.JSONEncoder.default(self,o)
 
+@app.after_request
+def add_response_headers(response=None):
+    if not response:
+        response = make_response()
+    response.headers.add("Access-Control-Allow-Origin", "*")
+    response.headers.add("Access-Control-Allow-Headers", "*")
+    return response
+
 @app.route("/recipes", methods=["GET", "POST"])
 def get_recipes():
     times = request.get_json(force=True,silent=True)
     if times==None:
         times=0
+    else:
+        times = times['loadMore']
     start = 0 + (20* times)
     rows=20
     cur.execute(f"SELECT * FROM recipe LIMIT {start},{rows};")
@@ -29,7 +39,7 @@ def get_recipes():
 
     return jsonify(json.loads(res))
     
-@app.route('/recipes/<id>', methods=["GET"])
+@app.route('/recipes/details/<id>', methods=["GET"])
 def get_recipe_details(id):
     cur.execute(f"CALL get_recipe_detail({id});")
     res = cur.fetchall();

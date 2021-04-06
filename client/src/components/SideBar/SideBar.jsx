@@ -16,6 +16,7 @@ export default function SideBar(props) {
 
 	const items = links.map((item, i) => (
 		<Link
+			key={i}
 			to={`/app/${item.path}`}
 			className={
 				window.location.pathname === `/app/${item.path}`
@@ -36,7 +37,6 @@ export default function SideBar(props) {
 				<Link
 					className="btn"
 					to="/app/new-recipe"
-					onClick={() => props.setSelected(-1)}
 				>
 					New Recipe
 				</Link>

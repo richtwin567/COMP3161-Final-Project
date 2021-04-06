@@ -1,0 +1,14 @@
+.recipe-card{
+    border-radius: 6px;
+    border: 1px var(--grey1) solid;
+    display: grid;
+    grid-template-columns: 20% auto max-content;
+    gap: 1rem;
+    grid-template-rows: 100%;
+}
+
+.recipe-card img{
+    height: 100%;
+    width: 100%;
+    object-fit: cover;
+}

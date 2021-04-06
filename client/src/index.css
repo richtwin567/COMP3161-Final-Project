@@ -1,4 +1,5 @@
 @import url("https://fonts.googleapis.com/css2?family=Poppins&family=Zilla+Slab:wght@300;400;500&display=swap");
+
 body {
   margin: 0;
   font-family: Poppins;
@@ -29,22 +30,22 @@ button {
   list-style-type: none;
 }
 
-:root {
-  --primary: #1e88e5;
-  --primary-dark: #0277bd;
-  --accent: #f9ac2f;
-  --on-light: #232323;
-  --on-dark: #ffffff;
-  --shadow: rgba(0, 0, 0, 0.25);
-  --grey1: #c4c4c4;
-  --grey2: #787878;
-}
-
 .btn {
   border: none;
   outline: none;
   cursor: pointer;
   transition: transform 0.35s ease;
+  border-radius: 5px;
+  padding: 1rem 3rem;
+  font-weight: bold;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.btn.filled.primary{
+  background-color: var(--primary);
+  color: var(--on-dark);
 }
 
 .btn:hover {
