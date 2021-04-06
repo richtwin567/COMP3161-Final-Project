@@ -2,14 +2,34 @@ import React from "react";
 
 import "./MealPlan.css";
 
-import { PlanGenerator, Meal, PlannerStatistics } from "./MealPlanComponents";
+import {
+  PlanGenerator,
+  MealCard,
+  PlannerStatistics,
+} from "./MealPlanComponents";
 
 function MealPlan() {
   return (
     <div id="meal-plan-view">
       <h1>My Meal Plan</h1>
       <main id="meal-plan-grid">
-        <section id="meal-plan-meals">Meals</section>
+        <section id="meal-plan-meals">
+          <div className="meal-time">
+            <h1>Breakfast</h1>
+            <MealCard></MealCard>
+            <MealCard></MealCard>
+          </div>
+          <div className="meal-time">
+            <h1>Lunch</h1>
+            <MealCard></MealCard>
+            <MealCard></MealCard>
+          </div>
+          <div className="meal-time">
+            <h1>Dinner</h1>
+            <MealCard></MealCard>
+            <MealCard></MealCard>
+          </div>
+        </section>
         <section id="meal-plan-utils">
           <img src="" alt="hero-img" />
           <PlannerStatistics

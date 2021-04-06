@@ -1,0 +1,118 @@
+#menu-item-card .menu-item {
+  border: 2px solid #b7b5b5;
+  border-radius: 10px;
+  width: 97%;
+  display: -ms-grid;
+  display: grid;
+  -ms-grid-columns: 1fr 4fr 2fr;
+  grid-template-columns: 1fr 4fr 2fr;
+  padding: 10px;
+  margin: 12px 0;
+  gap: 20px;
+}
+
+#menu-item-card .menu-item img {
+  -o-object-fit: cover;
+  object-fit: cover;
+  width: 4.5rem;
+  height: 4.5rem;
+  border-radius: 5px;
+  margin-left: 10px;
+}
+
+#menu-item-card .menu-item .meal-desc p {
+  color: #a8a6a6;
+  font-size: 14px;
+}
+
+#menu-item-card .menu-item .meal-desc p:nth-child(3) {
+  margin-bottom: 10px;
+}
+
+#menu-item-card .menu-item .tags {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+}
+
+#menu-item-card .menu-item .tags p {
+  font-size: 12px;
+  border: 1px solid #f9a825;
+  color: #232323;
+  margin-right: 10px;
+  padding: 3px 12px;
+  border-radius: 30px;
+}
+
+#menu-item-card button {
+  color: #fff;
+  background-color: #2196f3;
+  border: none;
+  font-size: 16px;
+  padding: 12px 25px;
+  border-radius: 3px;
+  cursor: pointer;
+  -webkit-transition: 0.25s ease background-color;
+  transition: 0.25s ease background-color;
+}
+
+.details p:hover {
+  color: #1a75c0;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+#menu-item-card .general-info {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: justify;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
+}
+
+#menu-item-card .details {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-line-pack: center;
+  align-content: center;
+  margin-top: 20px;
+}
+
+#menu-item-card .details p {
+  margin-right: 20px;
+}
+
+#menu-item-card .detailed-info {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  gap: 20px;
+  border-top: 2px solid #dadada;
+  margin-top: 15px;
+  padding-top: 5px;
+}
+
+#menu-item-card .info-heading {
+  color: grey;
+  font-size: 12px;
+}
+
+#menu-item-card .not-selected {
+  display: none;
+}
+
+#menu-item-card .selected-text {
+  font-weight: 700;
+  color: #2196f3;
+}
+
+#menu-item-card .show-details {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-transition: 0.2s;
+  transition: 0.2s;
+}
