@@ -18,7 +18,7 @@ export default function RecipeCard({ recipe }) {
 			</div>
 			<Link
 				to={{
-					pathname: `recipes/details/${recipe.recipe_id}`,
+					pathname: `/app/recipes/details/${recipe.recipe_id}`,
 					state: { recipe_id: recipe.recipe_id },
 				}}
 				className="btn primary filled"

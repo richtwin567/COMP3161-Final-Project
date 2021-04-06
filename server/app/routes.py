@@ -58,7 +58,7 @@ def add_response_headers(response=None):
     return response
 
 
-@app.route("/recipes", methods=["GET", "POST"])
+@app.route("/recipes", methods=["POST"])
 def get_recipes():
     times = request.get_json(force=True, silent=True)
     if times == None:
@@ -70,6 +70,27 @@ def get_recipes():
     cur.execute(f"SELECT * FROM recipe LIMIT {start},{rows};")
     res = cur.fetchall()
     res = json.dumps(res, cls=AggregatedDataEncoder)
+
+    return jsonify(json.loads(res))
+
+@app.route("/recipes-search", methods=["POST"])
+def filter_recipes():
+    global cur
+    global conn
+    times = request.get_json(force=True, silent=True)
+    search_val = request.args.get('recipe_name', type=str)
+    if times == None:
+        times = 0
+    else:
+        times = times['loadMore']
+    start = 0 + (20 * times)
+    rows = 20
+    cur.execute(f"SELECT * FROM recipe WHERE recipe_name LIKE '%{search_val}%' LIMIT {start},{rows};")
+    res = cur.fetchall()
+    
+
+    res = json.dumps(res, cls=AggregatedDataEncoder)
+
 
     return jsonify(json.loads(res))
 
@@ -105,12 +126,34 @@ def get_allergies():
 
     return jsonify(res)
 
+@app.route('/shopping-list/<id>', methods=['GET'])
+def get_shopping_list(id):
+    global cur
+    global conn
+    cur.execute(f"CALL get_user_shopping_list({id});")
+
+    res = cur.fetchall()
+
+    # prevents commands out of sync error
+    cur.close()
+    conn = connect(**app.config.get("DB_CONN_INFO"))
+    cur = conn.cursor(dictionary=True)
+
+    return jsonify(res)
+
 
 @app.route("/user/<id>", methods=["GET"])
 def get_user(id):
+    global cur
+    global conn
     cur.execute(f"CALL get_one_user({id});")
 
     res = cur.fetchone()
+
+    # prevents commands out of sync error
+    cur.close()
+    conn = connect(**app.config.get("DB_CONN_INFO"))
+    cur = conn.cursor(dictionary=True)
 
     return jsonify(json.loads(json.dumps(res, default=str)))
 
@@ -121,14 +164,7 @@ def login():
 
 
 app.route("/signup", methods=["POST"])
-
-
 def signup():
-    pass
-
-
-@app.route("/shoppinglist/<uid>", methods=["GET"])
-def get_shopping_list(uid):
     pass
 
 

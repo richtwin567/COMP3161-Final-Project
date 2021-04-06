@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import RecipeCard from "./RecipeCard/RecipeCard";
+import RecipeCard from "../../components/RecipeCard/RecipeCard";
 import "./RecipeCatalogue.css";
 
 function RecipeCatalogue() {
@@ -34,8 +34,8 @@ function RecipeCatalogue() {
 		};
 	}, [loadMore]);
 
-	const recipeList = recipes.map((recipe) => (
-		<RecipeCard recipe={recipe} key={recipe.recipe_id} />
+	const recipeList = recipes.map((recipe,i) => (
+		<RecipeCard recipe={recipe} key={i} />
 	));
 
 	return (

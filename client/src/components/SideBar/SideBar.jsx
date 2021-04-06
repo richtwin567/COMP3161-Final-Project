@@ -8,7 +8,7 @@ export default function SideBar(props) {
 		{ path: "profile", label: "My Profile" },
 		{ path: "my-plan", label: "My Meal Plan" },
 		{ path: "plan-generator", label: "Meal Plan Generator" },
-		{ path: "shopping-list", label: "Shopping List" },
+		{ path: "shopping-list/3", label: "Shopping List" },
 		{ path: "logout", label: "Logout" },
 	];
 

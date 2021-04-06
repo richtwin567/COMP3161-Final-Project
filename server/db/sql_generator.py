@@ -1299,29 +1299,21 @@ SELECT
     u.username,
     u.first_name,
     u.last_name,
-    u.allergy_id,
-    si.allergy_name,
     si.ingredient_id,
     si.ingredient_name,
-    si.calorie_count,
-    si.stock_quantity,
-    si.allergy_id ing_allergy_id,
-    si.allergy_name ing_allergy_name
+    si.stock_quantity
 FROM 
-    user_allergy_joined u
+    user u
     JOIN
         (
             SELECT 
                 s.stock_quantity,
                 i.ingredient_id,
                 i.ingredient_name,
-                i.calorie_count,
-                i.allergy_id,
-                i.allergy_name,
                 s.user_id
             FROM
                 in_stock s
-                JOIN ingredient_allergy_joined i
+                JOIN ingredient i
                 ON i.ingredient_id=s.ingredient_id
         ) si
     ON si.user_id=u.user_id
@@ -1637,8 +1629,7 @@ SELECT
     u.last_name,
     pa.ingredient_name,
     u.stock_quantity,
-    pa.total_amount amount_needed,
-    pa.unit
+    pa.amount amount_needed
 FROM
     user_in_stock_joined u
     JOIN 
@@ -1646,14 +1637,11 @@ FROM
             SELECT
                 p.for_user,
                 p.ingredient_name,
-                SUM(p.amount) total_amount,
-                p.unit
+                p.amount
             FROM
                 meal_plans_with_planned_meals p
-            GROUP BY p.for_user, p.ingredient_name
         ) pa
     ON pa.for_user=u.user_id
-GROUP BY pa.for_user, pa.ingredient_name
 """))
 # build procedures
 
@@ -1761,12 +1749,41 @@ procedures.append(create_procedure("get_user_meal_plan", """
                                    [parameter(Direction.IN, "uid", integer())]))
 
 procedures.append(create_procedure("get_user_shopping_list", """
-    SELECT *
-    FROM shopping_lists s WHERE s.for_user=user_id;
+    SELECT
+        SUM(p.amount) amount_needed,
+        si.stock_quantity,
+        p.ingredient_id,
+        p.ingredient_name
+    FROM
+        meal_plans_with_planned_meals p
+    JOIN(
+        SELECT
+            s.user_id,
+            s.stock_quantity,
+            i.ingredient_id,
+            i.ingredient_name
+        FROM
+            ingredient i
+        JOIN(
+            SELECT
+                *
+            FROM
+                `in_stock` ist
+            WHERE
+                ist.user_id=usid
+        ) s
+    ON
+        i.ingredient_id = s.ingredient_id
+    ) si
+    ON
+        p.for_user = si.user_id AND p.ingredient_id=si.ingredient_id
+    GROUP BY
+        p.ingredient_id,
+        si.stock_quantity;
     """,
                                    [
                                        parameter(Direction.IN,
-                                                 "user_id", integer())
+                                                 "uid", integer())
                                    ]))
 
 procedures.append(create_procedure("get_one_user", """
@@ -1833,7 +1850,7 @@ procedures.append(create_procedure("get_recipe_detail","""
             GROUP BY recipe_id
         ) ri
         ON ri.recipe_id=rimj.recipe_id
-        GROUP BY ri.recipe_id
+        GROUP BY ri.recipe_id;
     """,
     [
         parameter(Direction.IN, "rid", integer())
