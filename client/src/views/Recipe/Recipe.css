@@ -74,6 +74,11 @@ gap: 2.5rem;
 
 }
 
+#recipe-details .details .instructions-section .instructions .step-number{
+font-weight: bold;
+}
+
+
 #recipe-details .details .ingredients-section {
 	grid-area: ingredients;
 }

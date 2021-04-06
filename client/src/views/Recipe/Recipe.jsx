@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router";
 import { Link } from "react-router-dom";
 import "./Recipe.css";
+import * as mathjs from "mathjs";
+import * as moment from "moment";
 
 function Recipe({ props }) {
 	const { id } = useParams();
@@ -24,8 +26,12 @@ function Recipe({ props }) {
 	var instructions = [];
 	var ingredients = [];
 	var totalCalories = 0;
+	var totalTime = 0;
 
 	if (Object.keys(recipeData).length) {
+		totalTime = moment
+			.duration(recipeData.cook_time)
+			.add(moment.duration(recipeData.prep_time)).minutes();
 		instructions = recipeData.instructions.map((instr) => (
 			<div className="step">
 				<p className="step-number">Step {instr.step_number}</p>
@@ -35,11 +41,16 @@ function Recipe({ props }) {
 			</div>
 		));
 
-		ingredients = recipeData.ingredient_measurements.map((ing) => (
-			<li className="ingredient">
-				{ing.amount} {ing.unit} {ing.ingredient_name}
-			</li>
-		));
+		ingredients = recipeData.ingredient_measurements.map((ing) => {
+			var whole = parseInt(ing.amount);
+			var fraction = mathjs.fraction((ing.amount - whole).toFixed(2));
+			return (
+				<li className="ingredient">
+					{whole} {mathjs.format(fraction, { fracton: "ratio" })}{" "}
+					{ing.unit} {ing.ingredient_name}
+				</li>
+			);
+		});
 
 		recipeData.ingredient_measurements.forEach(
 			(el) => (totalCalories += el.calorie_count)
@@ -66,7 +77,7 @@ function Recipe({ props }) {
 							</div>
 							<div className="separator vertical"></div>
 							<div className="stat-group">
-								<p className="stat-val"></p>
+								<p className="stat-val">{totalTime}</p>
 								<p className="stat-label">minutes</p>
 							</div>
 							<div className="separator vertical"></div>
