@@ -4,4 +4,4 @@ export { default as Profile } from "./Profile/Profile";
 export { default as RecipeCatalogue } from "./RecipeCatalogue/RecipeCatalogue";
 export { default as Recipe } from "./Recipe/Recipe";
 export { default as MealPlan } from "./MealPlan/MealPlan";
-export { default as PlanGenerator } from "./PlanGenerator/PlanGenerator";
+export { default as MealPlanBuilder } from "./MealPlanBuilder/MealPlanBuilder";

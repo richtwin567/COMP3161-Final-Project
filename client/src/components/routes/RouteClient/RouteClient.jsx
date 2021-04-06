@@ -8,12 +8,12 @@ import {
 	Profile,
 	RecipeCatalogue,
 	MealPlan,
-	PlanGenerator,
+	MealPlanBuilder,
 	Recipe,
 } from "views";
 
 function RouteClient() {
-	return (
+  return (
 		<Switch>
 			<Route exact path="/auth">
 				<Auth />
@@ -25,7 +25,7 @@ function RouteClient() {
 				<MainLayout component={MealPlan} />
 			</Route>
 			<Route exact path="/app/plan-generator">
-				<MainLayout component={PlanGenerator} />
+				<MainLayout component={MealPlanBuilder} />
 			</Route>
 			<Route exact path="/app/recipes">
 				<MainLayout component={RecipeCatalogue} />
