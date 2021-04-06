@@ -34,7 +34,7 @@ function RouteClient() {
 				<MainLayout component={ShoppingList} />
 			</Route>
 			<Route exact path="/app/logout">
-				<Redirect to="/login" />
+				<Redirect to="/auth" />
 			</Route>
 			<Route path="/app/recipes/details/:id">
 				<MainLayout component={Recipe} />

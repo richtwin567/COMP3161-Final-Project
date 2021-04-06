@@ -68,6 +68,13 @@ def get_recipe_details(id):
     return jsonify(json.loads(res))
 
 
+@app.route('/allergies',methods=['GET'])
+def get_allergies():
+    cur.execute("SELECT * FROM allergy;")
+    res = cur.fetchall()
+
+    return jsonify(res)
+
 @app.route("/user/<id>", methods=["GET"])
 def get_user(id):
     cur.execute(f"CALL get_one_user({id});")
