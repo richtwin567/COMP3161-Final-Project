@@ -4,6 +4,7 @@ from mysql.connector import connect
 from . import app, conn, cur
 from flask import jsonify, make_response
 import json
+import jwt
 from werkzeug.exceptions import HTTPException
 from mysql.connector.errors import Error
 from datetime import datetime, timedelta
@@ -22,6 +23,30 @@ class AggregatedDataEncoder(json.JSONEncoder):
             return str(o)
 
         return json.JSONEncoder.default(self, o)
+
+
+def token_required(func):
+    @wraps(func)
+    def decorator(*args, **kwargs):
+
+        token = None
+
+        if 'x-access-token' in request.headers:
+            token = request.headers['x-access-token']
+
+        if not token:
+            return jsonify({'message': 'a valid token is missing'})
+
+        try:
+            data = jwt.decode(token, app.config.get('SECRET_KEY'))
+
+            cur.execute(f"CALL get_one_user({data.get('id')});")
+            current_user = cur.fetchone()
+        except Exception:
+            return jsonify({'message': 'token is invalid'})
+
+        return func(current_user, *args, **kwargs)
+    return decorator
 
 
 @app.after_request
@@ -73,12 +98,13 @@ def get_recipe_details(id):
     return jsonify(json.loads(res))
 
 
-@app.route('/allergies',methods=['GET'])
+@app.route('/allergies', methods=['GET'])
 def get_allergies():
     cur.execute("SELECT * FROM allergy;")
     res = cur.fetchall()
 
     return jsonify(res)
+
 
 @app.route("/user/<id>", methods=["GET"])
 def get_user(id):
