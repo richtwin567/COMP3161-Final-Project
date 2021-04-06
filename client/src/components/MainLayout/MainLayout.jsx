@@ -3,18 +3,24 @@ import SearchBar from "../SearchBar/SearchBar";
 import SideBar from "../SideBar/SideBar";
 import "./MainLayout.css";
 import { UserContext } from "context/UserContext";
+import { SearchContext } from "../../context/SearchContext";
 
 export default function MainLayout({ component: Component }) {
-  const [searchMode, setSearchMode] = useState(false);
-  const { userData } = useContext(UserContext);
+	const { userData } = useContext(UserContext);
 
-  return (
-    <div id="main-layout">
-      <SideBar user={userData} />
-      <SearchBar searching={searchMode} setSearchMode={setSearchMode} />
-      <div className="content">
-        <Component></Component>
-      </div>
-    </div>
-  );
+	const [searchVal, setSearchVal] = useState("");
+
+	return (
+		<div id="main-layout">
+			<SideBar user={userData} />
+			<SearchContext.Provider value={{ searchVal, setSearchVal }}>
+				<SearchBar />
+			</SearchContext.Provider>
+			<div className="content">
+				<SearchContext.Provider value={{ searchVal, setSearchVal }}>
+					<Component></Component>
+				</SearchContext.Provider>
+			</div>
+		</div>
+	);
 }

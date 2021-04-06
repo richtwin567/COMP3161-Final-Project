@@ -5,3 +5,4 @@ export { default as RecipeCatalogue } from "./RecipeCatalogue/RecipeCatalogue";
 export { default as Recipe } from "./Recipe/Recipe";
 export { default as MealPlan } from "./MealPlan/MealPlan";
 export { default as MealPlanBuilder } from "./MealPlanBuilder/MealPlanBuilder";
+export { default as SearchRecipe } from './SearchRecipe/SearchRecipe'

@@ -2,9 +2,9 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router";
 import { Link } from "react-router-dom";
 import "./Recipe.css";
-import * as mathjs from "mathjs";
 import * as moment from "moment";
 import { Chip } from "../../components";
+import { asFraction } from "../../util/Display";
 
 function Recipe({ props }) {
 	const { id } = useParams();
@@ -47,11 +47,10 @@ function Recipe({ props }) {
 		));
 
 		recipeData.ingredient_measurements.forEach((ing) => {
-			var whole = parseInt(ing.amount);
-			var fraction = mathjs.fraction((ing.amount - whole).toFixed(2));
+			var fraction = asFraction(ing.amount);
 			ingredients.push(
 				<li className="ingredient">
-					{whole} {fraction.n>0?mathjs.format(fraction, { fracton: "ratio" }):''} {ing.unit} {ing.ingredient_name}
+					{fraction} {ing.unit} {ing.ingredient_name}
 				</li>
 			);
 
