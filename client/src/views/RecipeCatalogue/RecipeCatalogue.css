@@ -18,3 +18,9 @@
 #recipes .recipe-list .recipe-card {
 	padding: 1rem 2rem;
 }
+
+#recipes .btn {
+	width: fit-content;
+	height: fit-content;
+    justify-self: center;
+}

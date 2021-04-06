@@ -1,16 +1,24 @@
 import axios from "axios";
 import { Redirect } from "react-router-dom";
 
-const API_ENDPOINT = "";
+const API_ENDPOINT = "http://localhost:9090";
 
 /**
  * Registers a user along with their allergies
  * @param {*} e
  * @param {object} formState
  */
-export async function registerUser(e, formState) {
+export async function registerUser(formState, e=undefined) {
   // Prevent the form from refreshing the page
-  e.preventDefault();
+  e?.preventDefault();
+
+  const res = await axios.post(API_ENDPOINT +'/signup', formState)
+
+  if (res.status===200 || res.status===202){
+    return loginUser(formState);
+  }
+
+  return {};
 
   // Destructure form's state object
 }
@@ -21,9 +29,9 @@ export async function registerUser(e, formState) {
  * @param {*} formState
  * @return {object} An object containing the JWT and user details
  */
-export async function loginUser(e, formState) {
+export async function loginUser(formState, e=undefined) {
   // Prevent the form from refreshing the page
-  e.preventDefault();
+  e?.preventDefault();
 
   // Destructure form's state object
   const { username, password } = formState;
