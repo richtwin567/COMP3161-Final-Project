@@ -17,3 +17,16 @@
   max-height: 75vh;
   padding-bottom: 70px;
 }
+
+.meal-time h1 {
+  color: var(--primary);
+}
+
+#meal-plan-utils {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+#meal-plan-utils img {
+  width: 75%;
+}
