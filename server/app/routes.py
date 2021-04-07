@@ -72,6 +72,10 @@ def login():
         If the user data is invalid or not found, a 401 response is
         returned
     """
+    # Referencing global connection and cursor
+    global cur
+    global conn
+
     # Retrieve login details from request
     req = request.get_json(force=True)
 
@@ -79,6 +83,8 @@ def login():
     username = req.get('username')
     password = req.get('password')
 
+    print(username)
+    print(password)
     # Check if the fields were successfully recieved, if not return a 401
     if username is None or password is None:
         return make_response(
@@ -87,9 +93,17 @@ def login():
             {'WWW-Authenticate': 'Basic realm ="Login details required"'})
 
     # Retrieve user credentials from database
-    cur.execute(f"CALL get_user_by_login('{username}','{password}')")
-    user_data = cur.fetchone()
+    try:
+        cur.execute(f"CALL get_user_by_login('{username}','{password}')")
+        user_data = cur.fetchone()
+    finally:
+        cur.close()
 
+        # Reconnecting cursor
+        conn = connect(**app.config.get("DB_CONN_INFO"))
+        cur = conn.cursor(dictionary=True)
+
+    print(user_data)
     # Return a 401 if no user is found
     if user_data is None:
         return abort(make_response(
@@ -99,14 +113,14 @@ def login():
     else:
         expiry_time = app.config.get('JWT_ACCESS_LIFESPAN').get('hours')
         user = {
-            'id': user_data.user_id,
-            'username': user_data.username,
-            'first_name': user_data.first_name,
-            'last_name': user_data.last_name,
-            'allergies': user_data.allergies,
+            'id': user_data.get('user_id'),
+            'username': user_data.get('username'),
+            'first_name': user_data.get('first_name'),
+            'last_name': user_data.get('last_name'),
+            'allergies': user_data.get('allergies'),
         }
         token = jwt.encode({
-            'id': user_data.user_id,
+            'id': user_data.get('user_id'),
             'exp': datetime.utcnow() + timedelta(hours=expiry_time),
 
         }, app.config.get('SECRET_KEY'), algorithm='HS256')
@@ -134,6 +148,8 @@ def signup():
 
     username = req.get('username')
     password = req.get('password')
+    first_name = req.get('first_name')
+    last_name = req.get('last_name')
 
     # Retrieve user credentials from database
     cur.execute(f"CALL get_user_by_login('{username}','{password}')")
@@ -145,6 +161,13 @@ def signup():
     cur = conn.cursor(dictionary=True)
 
     # Insert if user data is none
+    if user_data is None:
+
+        cur.execute(
+            f"CALL insert_user('{username}', '{first_name}', '{last_name}', '{password}')")
+        return make_response('Successfully registered.', 201)
+    else:
+        return make_response('User already exists. Please Log in.', 202)
 
 
 @app.after_request

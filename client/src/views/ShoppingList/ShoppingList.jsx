@@ -9,6 +9,7 @@ import {
 import "./ShoppingList.css";
 import { useParams } from "react-router";
 import { asFraction } from "../../util/Display";
+import Spinner from "../../components/Spinner/Spinner";
 
 function ShoppingList() {
 	const [shoppingList, setShoppingList] = useState([]);
@@ -44,20 +45,26 @@ function ShoppingList() {
 	return (
 		<div id="shopping-list">
 			<h1>Shopping List</h1>
-			<div id="shopping-list-grid">
-				<IngredientsList ingredients={shoppingList} />
-				<section id="shopping-list-cards">
-					<ShoppingListCard
-						itemName="Total Ingredients Needed"
-						itemQuantity={asFraction(totalNeeded)}
-					/>
-					<ShoppingListCard
-						itemName="Total Ingredients in Kitchen"
-						itemQuantity={asFraction(totalInStock)}
-					/>
-					<IngredientsListGenerator />
-				</section>
-			</div>
+			{shoppingList.length ? (
+				[
+					<div id="shopping-list-grid">
+						<IngredientsList ingredients={shoppingList} />
+						<section id="shopping-list-cards">
+							<ShoppingListCard
+								itemName="Total Ingredients Needed"
+								itemQuantity={asFraction(totalNeeded)}
+							/>
+							<ShoppingListCard
+								itemName="Total Ingredients in Kitchen"
+								itemQuantity={asFraction(totalInStock)}
+							/>
+							<IngredientsListGenerator />
+						</section>
+					</div>,
+				]
+			) : (
+				<Spinner />
+			)}
 		</div>
 	);
 }

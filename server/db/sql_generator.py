@@ -1799,7 +1799,8 @@ procedures.append(create_procedure("get_one_user", """
                                    ]))
 
 procedures.append(create_procedure("get_user_by_login", """
-SELECT * FROM user_allergy_joined_agg WHERE username=uname AND pass=password;
+SELECT * FROM user
+WHERE username=uname AND pass=password;
 """, [
     parameter(Direction.IN, 'uname', string()),
     parameter(Direction.IN, 'pass', string())
@@ -1933,8 +1934,8 @@ if __name__ == "__main__":
 
     print_done("Procedures created")
 
-    no_users = 200000
-    no_recipes = 600000
+    no_users = 200
+    no_recipes = 600
 
     print_info("Generating allergies data...")
     allergies_data = generate_allergies_data()

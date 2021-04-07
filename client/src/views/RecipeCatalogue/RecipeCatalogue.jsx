@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import RecipeCard from "../../components/RecipeCard/RecipeCard";
+import Spinner from "../../components/Spinner/Spinner";
 import "./RecipeCatalogue.css";
 
 function RecipeCatalogue() {
@@ -18,13 +19,27 @@ function RecipeCatalogue() {
 				},
 				body: JSON.stringify({ loadMore: loadMore }),
 			})
-				.then((res) => res.json())
+				.then((res) => {
+					console.log(res);
+					if (res.status === 200) {
+						return res.json();
+					} else {
+						res.json()
+							.then((err) => {
+								throw Error(err.message);
+							})
+							.catch((e) => console.error(e));
+					}
+				})
 				.then((data) => {
 					console.log(data);
-					setRecipes((prev) => prev.concat(data));
+					if (data.length) {
+						setRecipes((prev) => prev.concat(data));
+					}
 				})
 				.catch((e) => console.log(e));
 		}
+
 		if (isMounted) {
 			getRecipes();
 		}
@@ -34,23 +49,32 @@ function RecipeCatalogue() {
 		};
 	}, [loadMore]);
 
-	const recipeList = recipes.map((recipe,i) => (
-		<RecipeCard recipe={recipe} key={i} />
-	));
+	console.log(recipes);
+
+	var recipeList = [];
+	if (recipes.length) {
+		recipeList = recipes.map((recipe, i) => (
+			<RecipeCard recipe={recipe} key={i} />
+		));
+	}
 
 	return (
 		<div id="recipes">
 			<h1 className="page-title">Recipes</h1>
-			<div className="recipe-list">
-				{recipeList}
+			{recipeList.length ? (
+				<div className="recipe-list">
+					{recipeList}
 
-				<button
-					className="btn filled primary"
-					onClick={() => setLoadMore((prev) => prev + 1)}
-				>
-					Load More
-				</button>
-			</div>
+					<button
+						className="btn filled primary"
+						onClick={() => setLoadMore((prev) => prev + 1)}
+					>
+						Load More
+					</button>
+				</div>
+			) : (
+				<Spinner />
+			)}
 		</div>
 	);
 }

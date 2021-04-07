@@ -1,5 +1,6 @@
 import { useContext } from "react";
-import { useHistory, useLocation } from "react-router";
+import { useHistory } from "react-router";
+import { Link } from "react-router-dom";
 import { SearchContext } from "../../context/SearchContext";
 import { Search } from "../Icons";
 import "./SearchBar.css";
@@ -7,25 +8,28 @@ import "./SearchBar.css";
 export default function SearchBar() {
   const { searchVal, setSearchVal } = useContext(SearchContext);
   const history = useHistory();
-  console.log(history);
-  const loc = useLocation();
-  console.log(loc);
+
+  const searching = history.location.pathname === "/app/recipes-search";
   return (
     <div id="searchbar">
       <form>
-        <Search fill={"var(--grey1)"} />
-        <input
-          type="search"
-          name="recipe-name"
-          id="recipe-search"
-          value={searchVal}
-          onChange={(e) => setSearchVal(e.target.value)}
-          onFocus={() => {
-            if (loc.pathname !== "/app/recipes-search") {
-              history.push("/app/recipes-search");
-            }
-          }}
-        />
+        <Link to="/app/recipes-search">
+          <Search fill={"var(--grey1)"} />
+        </Link>
+        {searching ? (
+          <input
+            autoFocus
+            type="search"
+            name="recipe-name"
+            id="recipe-search"
+            value={searchVal}
+            onChange={(e) => setSearchVal(e.target.value)}
+          />
+        ) : (
+          <Link to="/app/recipes-search">
+            <p>Click to Search</p>
+          </Link>
+        )}
       </form>
     </div>
   );
