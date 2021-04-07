@@ -72,17 +72,17 @@ function RouteClient() {
 
 				{/* Redirects */}
 
-        <Route exact path="/app/logout">
-          {localStorage.setItem("auth-token", "")}
-          {localStorage.setItem("user", "")}
-          <Redirect to="/auth" />
-        </Route>
-        <Route exact path="/app">
-          <Redirect to="/app/recipes" />
-        </Route>
-        <Route exact path="/">
-          <Redirect to="/app/recipes" />
-        </Route>
+				<Route exact path="/app/logout">
+					{localStorage.setItem("auth-token", "")}
+					{localStorage.setItem("user", "")}
+					<Redirect to="/auth" />
+				</Route>
+				<Route exact path="/app">
+					<Redirect to="/app/recipes" />
+				</Route>
+				<Route exact path="/">
+					<Redirect to="/app/recipes" />
+				</Route>
 
 				{/* //TODO not found*/}
 			</Switch>

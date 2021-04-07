@@ -14,11 +14,13 @@ export async function registerUser(formState, e = undefined) {
 
   const res = await axios.post(API_ENDPOINT + "/signup", formState);
 
-  if (res.status === 200 || res.status === 202) {
+  if (res.status === 201) {
     return loginUser(formState);
   }
 
-  return {};
+  return {
+    error: "Failed to sign up and authenticate user",
+  };
 
   // Destructure form's state object
 }
@@ -43,9 +45,11 @@ export async function loginUser(formState, e = undefined) {
       password: password,
     });
 
+    console.log(loginResponse);
+
     // Retrieve token and user data from response
-    const token = loginResponse.data.token;
-    const userData = loginResponse.data.user;
+    const token = loginResponse.data.token ?? '';
+    const userData = loginResponse.data.user ?? {};
 
     // Store the JWT token
     sessionStorage.setItem("auth-token", token);
