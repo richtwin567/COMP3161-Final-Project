@@ -219,9 +219,9 @@ def get_measurements():
 
     return jsonify(json.loads(res))
 
-@app.route("/meal-plan")
-def get_meal_plan():
-    cur.execute(f"SELECT * FROM meal_plan m join planned_meal p on m.plan_id = p.plan_id join recipe r on r.recipe_id = p.recipe_id where m.for_user = 1;")
+@app.route("/meal-plan/<uid>")
+def get_meal_plan(uid):
+    cur.execute(f"SELECT * FROM meal_plan m join planned_meal p on m.plan_id = p.plan_id join recipe r on r.recipe_id = p.recipe_id where m.for_user = {uid};")
     res = cur.fetchall()
     res = json.dumps(res, cls=AggregatedDataEncoder)
     return jsonify(json.loads(res))
