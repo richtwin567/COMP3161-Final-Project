@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useCallback, useContext, useEffect, useState } from "react";
 import { SearchContext } from "../../context/SearchContext";
 import RecipeCard from "../../components/RecipeCard/RecipeCard";
 import "./SearchRecipe.css";
@@ -11,38 +11,44 @@ function SearchRecipe() {
 
 	const [message, setMessage] = useState("No results found");
 	const history = useHistory();
-	const { searchVal, setSearchVal } = useContext(SearchContext);
+	const { searchVal } = useContext(SearchContext);
 
-	async function getRecipes(shouldClear) {
-		fetch(`http://localhost:9090/recipes-search?recipe_name=${searchVal}`, {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify({ loadMore: loadMore }),
-		})
-			.then((res) => {
-				console.log(res);
-				if (res.status === 200) {
-					return res.json();
-				} else {
-					setMessage("Something went wrong :(");
-					res.json()
-						.then((err) => {
-							throw Error(err.message);
-						})
-						.catch((e) => console.error(e));
+	const getRecipes = useCallback(
+		async (shouldClear) => {
+			fetch(
+				`http://localhost:9090/recipes-search?recipe_name=${searchVal}`,
+				{
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+					},
+					body: JSON.stringify({ loadMore: loadMore }),
 				}
-			})
-			.then((data) =>
-				data.length
-					? shouldClear
-						? setRecipes(data)
-						: setRecipes((prev) => prev.concat(data))
-					: setMessage("No results found")
 			)
-			.catch((e) => console.log(e));
-	}
+				.then((res) => {
+					console.log(res);
+					if (res.status === 200) {
+						return res.json();
+					} else {
+						setMessage("Something went wrong :(");
+						res.json()
+							.then((err) => {
+								throw Error(err.message);
+							})
+							.catch((e) => console.error(e));
+					}
+				})
+				.then((data) =>
+					data.length
+						? shouldClear
+							? setRecipes(data)
+							: setRecipes((prev) => prev.concat(data))
+						: setMessage("No results found")
+				)
+				.catch((e) => console.log(e));
+		},
+		[loadMore, searchVal]
+	);
 
 	useEffect(() => {
 		let isMounted = true;
@@ -54,7 +60,7 @@ function SearchRecipe() {
 		return () => {
 			isMounted = false;
 		};
-	}, [loadMore]);
+	}, [getRecipes, loadMore]);
 
 	useEffect(() => {
 		let isMounted = true;
@@ -67,7 +73,7 @@ function SearchRecipe() {
 		return () => {
 			isMounted = false;
 		};
-	}, [searchVal]);
+	}, [getRecipes, searchVal]);
 
 	var recipeList = [];
 	if (recipes.length) {

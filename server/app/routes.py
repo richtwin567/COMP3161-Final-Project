@@ -148,6 +148,34 @@ def get_meal_plan(uid):
     pass
 
 
+@app.route('/measurements', methods=["GET"])
+def get_measurements():
+    global cur
+    global conn
+    cur.execute('SELECT * FROM measurement;')
+    res = cur.fetchall()
+
+    # prevents commands out of sync error
+    cur.close()
+    conn = connect(**app.config.get("DB_CONN_INFO"))
+    cur = conn.cursor(dictionary=True)
+
+    return jsonify(res)
+
+@app.route('/ingredients', methods=["GET"])
+def get_ingredients():
+    global cur
+    global conn
+    cur.execute('SELECT * FROM ingredient;')
+    res = cur.fetchall()
+
+    # prevents commands out of sync error
+    cur.close()
+    conn = connect(**app.config.get("DB_CONN_INFO"))
+    cur = conn.cursor(dictionary=True)
+
+    return jsonify(res)
+
 @app.errorhandler(HTTPException)
 def json_http_errors(err):
     """

@@ -45,7 +45,9 @@ function RouteClient() {
 				<Route exact path="/app/recipes-search">
 					<MainLayout component={SearchRecipe} />
 				</Route>
-				<Route exact path="/app/new-recipe"><MainLayout component={NewRecipe}/></Route>
+				<Route exact path="/app/new-recipe">
+					<MainLayout component={NewRecipe} />
+				</Route>
 				{/* //TODO not found*/}
 			</Switch>
 		</BrowserRouter>
