@@ -11,6 +11,7 @@ import {
 	MealPlanBuilder,
 	Recipe,
 	SearchRecipe,
+	NewRecipe,
 } from "views";
 
 function RouteClient() {
@@ -44,6 +45,7 @@ function RouteClient() {
 				<Route exact path="/app/recipes-search">
 					<MainLayout component={SearchRecipe} />
 				</Route>
+				<Route exact path="/app/new-recipe"><MainLayout component={NewRecipe}/></Route>
 				{/* //TODO not found*/}
 			</Switch>
 		</BrowserRouter>

@@ -9,6 +9,7 @@ function SearchRecipe() {
 
 	const [loadMore, setLoadMore] = useState(0);
 
+	const [message, setMessage] = useState("No results found");
 	const history = useHistory();
 	const { searchVal, setSearchVal } = useContext(SearchContext);
 
@@ -20,11 +21,25 @@ function SearchRecipe() {
 			},
 			body: JSON.stringify({ loadMore: loadMore }),
 		})
-			.then((res) => res.json())
+			.then((res) => {
+				console.log(res);
+				if (res.status === 200) {
+					return res.json();
+				} else {
+					setMessage("Something went wrong :(");
+					res.json()
+						.then((err) => {
+							throw Error(err.message);
+						})
+						.catch((e) => console.error(e));
+				}
+			})
 			.then((data) =>
-				shouldClear
-					? setRecipes(data)
-					: setRecipes((prev) => prev.concat(data))
+				data.length
+					? shouldClear
+						? setRecipes(data)
+						: setRecipes((prev) => prev.concat(data))
+					: setMessage("No results found")
 			)
 			.catch((e) => console.log(e));
 	}
@@ -54,9 +69,12 @@ function SearchRecipe() {
 		};
 	}, [searchVal]);
 
-	const recipeList = recipes.map((recipe, i) => (
-		<RecipeCard recipe={recipe} key={i} />
-	));
+	var recipeList = [];
+	if (recipes.length) {
+		recipeList = recipes.map((recipe, i) => (
+			<RecipeCard recipe={recipe} key={i} />
+		));
+	}
 
 	return (
 		<div id="recipes">
@@ -81,9 +99,7 @@ function SearchRecipe() {
 					</button>
 				</div>
 			) : (
-				<h2 className="recipe-list">
-					No results found for {searchVal}
-				</h2>
+				<h2 className="recipe-list">{message}</h2>
 			)}
 		</div>
 	);

@@ -13,7 +13,7 @@ class Config:
         "user": os.environ.get("DB_USER") or "",
         "password": os.environ.get("DB_PASSWORD") or "",
         "host":os.environ.get("DB_HOST") or "",
-        "port":os.environ.get("DB_PORT")
+        "port": int(os.environ.get("DB_PORT")) or 3307
     }
 
     DB_URL = dburl
