@@ -533,7 +533,7 @@ def random_time():
 
 
 # Functions to generate the insert statements
-CAP =100000
+CAP =100
 
 def generate_recipe_data(no_entries, no_users, faker_obj):
     """Creates the INSERT queries for the Recipe table
@@ -1922,8 +1922,8 @@ if __name__ == "__main__":
 
     print_done("Procedures created")
 
-    no_users = 200000
-    no_recipes = 600000
+    no_users = 200
+    no_recipes = 600
 
     print_info("Generating allergies data...")
     allergies_data = generate_allergies_data()
