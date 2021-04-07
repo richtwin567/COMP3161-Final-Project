@@ -1,6 +1,10 @@
-import React from "react";
+import React, { useContext } from "react";
 import { Switch, Route, Redirect, BrowserRouter } from "react-router-dom";
 import { ProtectedRoute } from "components/routes";
+
+import { logout } from "util/AuthHandler";
+
+import { UserContext } from "context/UserContext";
 
 import {
 	Auth,
@@ -68,16 +72,17 @@ function RouteClient() {
 
 				{/* Redirects */}
 
-				<Route exact path="/app/logout">
-					{localStorage.setItem("auth-token", "")}
-					<Redirect to="/auth" />
-				</Route>
-				<Route exact path="/app">
-					<Redirect to="/app/profile" />
-				</Route>
-				<Route exact path="/">
-					<Redirect to="/app/profile" />
-				</Route>
+        <Route exact path="/app/logout">
+          {localStorage.setItem("auth-token", "")}
+          {localStorage.setItem("user", "")}
+          <Redirect to="/auth" />
+        </Route>
+        <Route exact path="/app">
+          <Redirect to="/app/profile" />
+        </Route>
+        <Route exact path="/">
+          <Redirect to="/app/profile" />
+        </Route>
 
 				{/* //TODO not found*/}
 			</Switch>

@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import "./SideBar.css";
 
 export default function SideBar(props) {
-
 	console.log(props);
 	const links = [
 		{ path: "recipes", label: "Recipes" },
@@ -13,7 +12,6 @@ export default function SideBar(props) {
 		{ path: `shopping-list/${props.user?.id}`, label: "Shopping List" },
 		{ path: "logout", label: "Logout" },
 	];
-
 
 	const items = links.map((item, i) => (
 		<Link
@@ -35,10 +33,7 @@ export default function SideBar(props) {
 				<h1>
 					Hi, {props.user?.first_name + " " + props.user?.last_name}
 				</h1>
-				<Link
-					className="btn"
-					to="/app/new-recipe"
-				>
+				<Link className="btn" to="/app/new-recipe">
 					New Recipe
 				</Link>
 			</div>
