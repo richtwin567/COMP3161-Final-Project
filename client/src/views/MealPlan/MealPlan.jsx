@@ -37,7 +37,7 @@ export default function MealPlan() {
   };
 
   const getMealPlans = async () => {
-    let res = await fetch(`http://localhost:9090/meal-plan/${ran}`);
+    let res = await fetch(`http://localhost:9090/meal-plan/${user.id}}`);
     let data = await res.json();
     console.log(data);
     setMealPlans(data);
