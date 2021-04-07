@@ -78,10 +78,10 @@ function RouteClient() {
           <Redirect to="/auth" />
         </Route>
         <Route exact path="/app">
-          <Redirect to="/app/profile" />
+          <Redirect to="/app/recipes" />
         </Route>
         <Route exact path="/">
-          <Redirect to="/app/profile" />
+          <Redirect to="/app/recipes" />
         </Route>
 
 				{/* //TODO not found*/}
