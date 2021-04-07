@@ -50,7 +50,8 @@
 }
 
 #auth-form input[type="text"],
-[type="password"], #auth-form select {
+[type="password"],
+#auth-form select {
   border: none;
   width: 100%;
   padding: 5px;
@@ -73,13 +74,16 @@
   background-color: var(--primary-dark);
 }
 
-#username {
+#username,
+#firstname,
+#lastname {
   margin: 3em 0;
   background: url("assets/icons/account_circle.svg") no-repeat scroll;
   background-size: contain;
 }
 
-#password {
+#password,
+#password-confim {
   margin: 3em 0;
   background: url("assets/icons/lock.svg") no-repeat scroll;
   background-size: contain;
