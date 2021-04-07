@@ -1691,7 +1691,7 @@ procedures.append(create_procedure("insert_allergy", """
 # procedure to insert user and return inserted record id
 procedures.append(create_procedure("insert_user", """
     INSERT INTO user(username, first_name, last_name, password) VALUES
-    (new_username, new_first_name, new_last_name, password);
+    (new_username, new_first_name, new_last_name, new_password);
     SET new_id = LAST_INSERT_ID();
     """,
                                    [

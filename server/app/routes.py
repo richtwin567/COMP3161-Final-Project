@@ -148,8 +148,8 @@ def signup():
 
     username = req.get('username')
     password = req.get('password')
-    first_name = req.get('first_name')
-    last_name = req.get('last_name')
+    first_name = req.get('firstName')
+    last_name = req.get('lastName')
 
     # Retrieve user credentials from database
     cur.execute(f"CALL get_user_by_login('{username}','{password}')")
@@ -162,10 +162,16 @@ def signup():
 
     # Insert if user data is none
     if user_data is None:
+        print(req)
+        print([username, password, first_name, last_name])
+        try:
+            cur.execute(
+                f"CALL insert_user('{username}', '{first_name}', '{last_name}', '{password}', @user_id)")
+        finally:
+            conn.commit()
 
-        cur.execute(
-            f"CALL insert_user('{username}', '{first_name}', '{last_name}', '{password}', @user_id)")
-
+        conn = connect(**app.config.get("DB_CONN_INFO"))
+        cur = conn.cursor(dictionary=True)
         return make_response('Successfully registered.', 201)
     else:
         return make_response('User already exists. Please Log in.', 202)
