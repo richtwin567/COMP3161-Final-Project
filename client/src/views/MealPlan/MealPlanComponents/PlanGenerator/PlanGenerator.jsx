@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from "react";
 import "./PlanGenerator.css";
 
-function PlanGenerator({ onClick }) {
+function PlanGenerator({ onClick, ran }) {
   const [selected, setSelected] = useState(false);
 
   const addNewPlan = async (mealPlan) => {
-    let ran = Math.floor(Math.random() * 2000);
     await fetch(`http://localhost:9090/meal-plan/new/${ran}`, {
       method: "POST",
       body: JSON.stringify({
