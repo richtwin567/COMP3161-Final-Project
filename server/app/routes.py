@@ -246,7 +246,7 @@ def add_meal_plan(uid):
         serving_size = i['serving_size']
         rid = i['recipe_id']
         try:
-            cur.execute(f"INSERT INTO planned_meal (time_of_day, serving_size, recipe_id, plan_id) values('{tod}', {serving_size}, {rid}, 1);")
+            cur.execute(f"INSERT INTO planned_meal (time_of_day, serving_size, recipe_id, plan_id) values('{tod}', {serving_size}, {rid}, {uid);")
         finally:
             conn.commit() 
 
