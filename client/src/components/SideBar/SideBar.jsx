@@ -7,7 +7,6 @@ export default function SideBar(props) {
 	const links = [
 		{ path: "recipes", label: "Recipes" },
 		{ path: "my-plan", label: "My Meal Plan" },
-		{ path: "plan-generator", label: "Meal Plan Generator" },
 		{ path: `shopping-list/${props.user?.id}`, label: "Shopping List" },
 		{ path: "logout", label: "Logout" },
 	];

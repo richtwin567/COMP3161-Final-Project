@@ -726,7 +726,11 @@ CREATE PROCEDURE get_user_by_login(IN uname VARCHAR(255), IN pass VARCHAR(255))
 BEGIN
     
 SELECT * FROM user
+<<<<<<< HEAD
 WHERE username=uname AND password=pass;
+=======
+WHERE username=uname AND pass=password;
+>>>>>>> merging-rojae
 
 END //
 
