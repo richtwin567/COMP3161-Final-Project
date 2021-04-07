@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState } from "react";
 import { UserContext } from "../../../../context/UserContext";
 import "./PlanGenerator.css";
 
-function PlanGenerator({ onClick }) {
+function PlanGenerator({ onClick, ran }) {
   const [selected, setSelected] = useState(false);
   const user = JSON.parse(sessionStorage.getItem("user"));
 

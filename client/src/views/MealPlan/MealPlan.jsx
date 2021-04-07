@@ -7,8 +7,11 @@ import {
   MealCard,
   //PlannerStatistics,
 } from "./MealPlanComponents";
+import Spinner from "../../components/Spinner/Spinner";
 
 export default function MealPlan() {
+  const user = JSON.parse(sessionStorage.getItem("user"));
+  let ran = Math.floor(Math.random() * 2000);
   const [ingredientsInfo, setIngredientsInfo] = useState({
     breakfast: 0,
     lunch: 0,
@@ -20,7 +23,7 @@ export default function MealPlan() {
 
   const attachIngredients = () => {
     const getIngredientsForMeal = async (rid) => {
-      let res = await fetch(`http://localhost:9090/ingredients-filter/${rid}`);
+      let res = await fetch(`http://localhost:9090/ingredients-filter/${user.id}`);
       let data = await res.json();
       return data;
     };
@@ -34,7 +37,7 @@ export default function MealPlan() {
   };
 
   const getMealPlans = async () => {
-    let res = await fetch("http://localhost:9090/meal-plan");
+    let res = await fetch(`http://localhost:9090/meal-plan/${ran}`);
     let data = await res.json();
     console.log(data);
     setMealPlans(data);
@@ -52,6 +55,7 @@ export default function MealPlan() {
   return (
     <div id="meal-plan-view">
       <h1>My Meal Plan</h1>
+      {mealPlans.length ?
       <main id="meal-plan-grid">
         <section id="meal-plan-meals">
           <div className="meal-time">
@@ -121,9 +125,9 @@ export default function MealPlan() {
             mealsPrepared="3"
             totalMeals="5"
           /> */}
-          <PlanGenerator />
+          <PlanGenerator ran={ran} />
         </section>
-      </main>
+      </main>: <Spinner/>}
     </div>
   );
 }
