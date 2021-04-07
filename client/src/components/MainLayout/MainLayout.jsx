@@ -6,21 +6,22 @@ import { UserContext } from "context/UserContext";
 import { SearchContext } from "../../context/SearchContext";
 
 export default function MainLayout({ component: Component }) {
-	const { userData } = useContext(UserContext);
+  // Incredibly insecure but
+  const user = JSON.parse(sessionStorage.getItem("user"));
 
-	const [searchVal, setSearchVal] = useState("");
+  const [searchVal, setSearchVal] = useState("");
 
-	return (
-		<div id="main-layout">
-			<SideBar user={userData} />
-			<SearchContext.Provider value={{ searchVal, setSearchVal }}>
-				<SearchBar />
-			</SearchContext.Provider>
-			<div className="content">
-				<SearchContext.Provider value={{ searchVal, setSearchVal }}>
-					<Component></Component>
-				</SearchContext.Provider>
-			</div>
-		</div>
-	);
+  return (
+    <div id="main-layout">
+      <SideBar user={user} />
+      <SearchContext.Provider value={{ searchVal, setSearchVal }}>
+        <SearchBar />
+      </SearchContext.Provider>
+      <div className="content">
+        <SearchContext.Provider value={{ searchVal, setSearchVal }}>
+          <Component></Component>
+        </SearchContext.Provider>
+      </div>
+    </div>
+  );
 }

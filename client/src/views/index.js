@@ -7,3 +7,4 @@ export { default as MealPlan } from "./MealPlan/MealPlan";
 export { default as MealPlanBuilder } from "./MealPlanBuilder/MealPlanBuilder";
 export { default as SearchRecipe } from "./SearchRecipe/SearchRecipe";
 export { default as AddRecipe } from "./AddRecipe/AddRecipe";
+export { default as NewRecipe } from "./NewRecipe/NewRecipe";

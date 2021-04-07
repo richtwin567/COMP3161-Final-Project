@@ -1,18 +1,18 @@
-import React from "react";
-
+import React, { useContext } from "react";
 import { Redirect, Route } from "react-router-dom";
+import { MainLayout } from "components";
 
-function ProtectedRoute({ component: Component, ...rest }) {
+function ProtectedRoute({ protectedComponent: Component, ...rest }) {
   return (
     <Route
       {...rest}
       render={(props) => {
-        let token = localStorage.getItem("auth-token");
-        console.log(token);
+        const token = JSON.parse(sessionStorage.getItem("auth-token"));
+        const user = JSON.parse(sessionStorage.getItem("user"));
         if (token) {
           return (
             <div>
-              <Component {...props} />
+              <MainLayout component={Component} />
             </div>
           );
         } else {

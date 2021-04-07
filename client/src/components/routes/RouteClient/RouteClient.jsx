@@ -1,7 +1,11 @@
-import React from "react";
+import React, { useContext } from "react";
 import { Switch, Route, Redirect, BrowserRouter } from "react-router-dom";
+import { ProtectedRoute } from "components/routes";
 
-import { MainLayout } from "components";
+import { logout } from "util/AuthHandler";
+
+import { UserContext } from "context/UserContext";
+
 import {
   Auth,
   ShoppingList,
@@ -12,42 +16,75 @@ import {
   Recipe,
   SearchRecipe,
   AddRecipe,
+  NewRecipe,
 } from "views";
 
 function RouteClient() {
   return (
     <BrowserRouter>
       <Switch>
+        {/* Authentication */}
+
         <Route exact path="/auth">
           <Auth />
         </Route>
-        <Route exact path="/app/profile">
-          <MainLayout component={Profile} />
-        </Route>
-        <Route exact path="/app/my-plan">
-          <MainLayout component={MealPlan} />
-        </Route>
-        <Route exact path="/app/plan-generator">
-          <MainLayout component={MealPlanBuilder} />
-        </Route>
-        <Route exact path="/app/recipes">
-          <MainLayout component={RecipeCatalogue} />
-        </Route>
-        <Route exact path="/app/shopping-list/:id">
-          <MainLayout component={ShoppingList} />
-        </Route>
+
+        {/* Protected Routes */}
+
+        <ProtectedRoute
+          exact
+          path="/app/profile"
+          protectedComponent={Profile}
+        />
+        <ProtectedRoute
+          exact
+          path="/app/my-plan"
+          protectedComponent={MealPlan}
+        />
+        <ProtectedRoute
+          exact
+          path="/app/plan-generator"
+          protectedComponent={MealPlanBuilder}
+        />
+        <ProtectedRoute
+          exact
+          path="/app/recipes"
+          protectedComponent={RecipeCatalogue}
+        />
+        <ProtectedRoute
+          exact
+          path="/app/shopping-list/:id"
+          protectedComponent={ShoppingList}
+        />
+        <ProtectedRoute
+          path="/app/recipes/details/:id"
+          protectedComponent={Recipe}
+        />
+        <ProtectedRoute
+          exact
+          path="/app/recipes-search"
+          protectedComponent={SearchRecipe}
+        />
+        <ProtectedRoute
+          exact
+          path="/app/new-recipe"
+          protectedComponent={NewRecipe}
+        />
+
+        {/* Redirects */}
+
         <Route exact path="/app/logout">
+          {localStorage.setItem("auth-token", "")}
+          {localStorage.setItem("user", "")}
           <Redirect to="/auth" />
         </Route>
-        <Route exact path="/app/new-recipe">
-          <MainLayout component={AddRecipe} />
+        <Route exact path="/app">
+          <Redirect to="/app/profile" />
         </Route>
-        <Route path="/app/recipes/details/:id">
-          <MainLayout component={Recipe} />
+        <Route exact path="/">
+          <Redirect to="/app/profile" />
         </Route>
-        <Route exact path="/app/recipes-search">
-          <MainLayout component={SearchRecipe} />
-        </Route>
+
         {/* //TODO not found*/}
       </Switch>
     </BrowserRouter>

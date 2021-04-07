@@ -5,6 +5,7 @@ import "./Recipe.css";
 import * as moment from "moment";
 import { Chip } from "../../components";
 import { asFraction } from "../../util/Display";
+import Spinner from "../../components/Spinner/Spinner";
 
 function Recipe({ props }) {
 	const { id } = useParams();
@@ -28,14 +29,15 @@ function Recipe({ props }) {
 	var ingredients = [];
 	var totalCalories = 0;
 	var totalTime = 0;
-    var allergies = [];
-    var tags=[];  
+	var allergies = [];
+	var tags = [];
 
-	if (Object.keys(recipeData).length) {
-        tags = [<Chip className="accent">{recipeData.culture}</Chip>];
+	if (Object.keys(recipeData).length >0) {
+		tags = [<Chip className="accent">{recipeData.culture}</Chip>];
 		totalTime = moment
 			.duration(recipeData.cook_time)
-			.add(moment.duration(recipeData.prep_time)).minutes();
+			.add(moment.duration(recipeData.prep_time))
+			.minutes();
 
 		instructions = recipeData.instructions.map((instr) => (
 			<div className="step">
@@ -54,7 +56,7 @@ function Recipe({ props }) {
 				</li>
 			);
 
-            allergies.push(<li>{ing.allergy_name}</li>);
+			allergies.push(<li>{ing.allergy_name}</li>);
 		});
 
 		recipeData.ingredient_measurements.forEach(
@@ -67,7 +69,7 @@ function Recipe({ props }) {
 			<Link className="btn primary outline" to="/app/recipes">
 				Back
 			</Link>
-			{Object.keys(recipeData).length && (
+			{Object.keys(recipeData).length ? (
 				<div className="details">
 					<div className="section-1">
 						<h1 className="page-title">{recipeData.recipe_name}</h1>
@@ -103,19 +105,24 @@ function Recipe({ props }) {
 						<div className="instructions">{instructions}</div>
 					</div>
 					<div className="allergy-info">
-                        <h3>Allergy Info</h3>
-                        <p className="allergies-preface">This recipes includes ingredients that may trigger the following allergies:</p>
-                        <ul className="allergy-list">{allergies}</ul>
-                    </div>
+						<h3>Allergy Info</h3>
+						<p className="allergies-preface">
+							This recipes includes ingredients that may trigger
+							the following allergies:
+						</p>
+						<ul className="allergy-list">{allergies}</ul>
+					</div>
 					<div className="tags-section">
-                        <h3>Tags</h3>
-                        <div className="tags">{tags}</div>
-                    </div>
+						<h3>Tags</h3>
+						<div className="tags">{tags}</div>
+					</div>
 					<div className="ingredients-section">
 						<h3>Ingredients</h3>
 						<ul className="ingredients">{ingredients}</ul>
 					</div>
 				</div>
+			) : (
+				<Spinner />
 			)}
 		</div>
 	);

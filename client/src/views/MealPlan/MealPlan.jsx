@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import "./MealPlan.css";
+
+import HeroImage from "assets/images/hero_image.png";
 import {
   PlanGenerator,
   MealCard,
@@ -112,7 +114,7 @@ export default function MealPlan() {
           </div>
         </section>
         <section id="meal-plan-utils">
-          <img src="" alt="hero-img" />
+          <img src={HeroImage} alt="hero-img" />
           {/* <PlannerStatistics
             noCalories="10"
             totalCalories="20"
