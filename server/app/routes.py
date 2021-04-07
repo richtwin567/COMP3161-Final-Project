@@ -2,8 +2,10 @@ from flask.globals import request
 from flask.json import JSONEncoder
 from mysql.connector import connect
 from . import app, conn, cur
-from flask import jsonify, make_response
+from flask import jsonify, make_response, abort
 import json
+import jwt
+from jwt.exceptions import ExpiredSignatureError, InvalidSignatureError
 from werkzeug.exceptions import HTTPException
 from mysql.connector.errors import Error
 from datetime import datetime, timedelta
@@ -22,6 +24,157 @@ class AggregatedDataEncoder(json.JSONEncoder):
             return str(o)
 
         return json.JSONEncoder.default(self, o)
+
+
+def token_required(func):
+    """Decorator to verify the JWT."""
+    @wraps(func)
+    def decorator(*args, **kwargs):
+
+        token = None
+
+        # Retrieve the JWT from the request header
+        if 'x-access-token' in request.headers:
+            token = request.headers['x-access-token']
+
+        # Returns that the token is missing
+        if not token:
+            return jsonify({'message': 'a valid token is missing'})
+
+        try:
+            # Decode the token to retrieve the user requesting the data
+            data = jwt.decode(token, app.config.get(
+                'SECRET_KEY'), algorithms="HS256")
+
+            # Retrieve the user from the database
+            cur.execute(f"CALL get_one_user({data.get('id')});")
+            current_user = cur.fetchone()
+
+        except InvalidSignatureError:
+            abort(make_response({"message": 'Token is invalid'}, 401))
+
+        except ExpiredSignatureError:
+            abort(make_response({"message": 'Token is expired'}, 401))
+
+        return func(current_user, *args, **kwargs)
+    return decorator
+
+
+@app.route("/login", methods=["POST"])
+def login():
+    """Route for handling user login.
+
+    Args:
+        None
+    Returns:
+        A JSON response with the JWT if the user is succesfully logged in
+        and a 202 response code.
+        If the user data is invalid or not found, a 401 response is
+        returned
+    """
+    # Referencing global connection and cursor
+    global cur
+    global conn
+
+    # Retrieve login details from request
+    req = request.get_json(force=True)
+
+    # Extract username and password from request
+    username = req.get('username')
+    password = req.get('password')
+
+    print(username)
+    print(password)
+    # Check if the fields were successfully recieved, if not return a 401
+    if username is None or password is None:
+        return make_response(
+            'Could not verify user',
+            401,
+            {'WWW-Authenticate': 'Basic realm ="Login details required"'})
+
+    # Retrieve user credentials from database
+    try:
+        cur.execute(f"CALL get_user_by_login('{username}','{password}')")
+        user_data = cur.fetchone()
+    finally:
+        cur.close()
+
+        # Reconnecting cursor
+        conn = connect(**app.config.get("DB_CONN_INFO"))
+        cur = conn.cursor(dictionary=True)
+
+    print(user_data)
+    # Return a 401 if no user is found
+    if user_data is None:
+        return abort(make_response(
+            {"message": 'Could not verify user'},
+            401,
+            {'WWW-Authenticate': 'Basic realm ="User does not exist"'}))
+    else:
+        expiry_time = app.config.get('JWT_ACCESS_LIFESPAN').get('hours')
+        user = {
+            'id': user_data.get('user_id'),
+            'username': user_data.get('username'),
+            'first_name': user_data.get('first_name'),
+            'last_name': user_data.get('last_name'),
+            'allergies': user_data.get('allergies'),
+        }
+        token = jwt.encode({
+            'id': user_data.get('user_id'),
+            'exp': datetime.utcnow() + timedelta(hours=expiry_time),
+
+        }, app.config.get('SECRET_KEY'), algorithm='HS256')
+
+        return make_response(jsonify(
+            {'token': token, 'user': user}), 202)
+
+
+@app.route("/signup", methods=["POST"])
+def signup():
+    """Route to retrieve details to sign a user up.
+
+    Args:
+        None
+    Returns:
+        response_code: 201 if the registration is succesful
+                    401 if the user already exists
+    """
+    # Reference global variables
+    global cur
+    global conn
+
+    # Retrieve signup details from form
+    req = request.get_json(force=True)
+
+    username = req.get('username')
+    password = req.get('password')
+    first_name = req.get('firstName')
+    last_name = req.get('lastName')
+
+    # Retrieve user credentials from database
+    cur.execute(f"CALL get_user_by_login('{username}','{password}')")
+    user_data = cur.fetchone()
+
+    # Prevents commands out of sync error
+    cur.close()
+    conn = connect(**app.config.get("DB_CONN_INFO"))
+    cur = conn.cursor(dictionary=True)
+
+    # Insert if user data is none
+    if user_data is None:
+        print(req)
+        print([username, password, first_name, last_name])
+        try:
+            cur.execute(
+                f"CALL insert_user('{username}', '{first_name}', '{last_name}', '{password}', @user_id)")
+        finally:
+            conn.commit()
+
+        conn = connect(**app.config.get("DB_CONN_INFO"))
+        cur = conn.cursor(dictionary=True)
+        return make_response('Successfully registered.', 201)
+    else:
+        return make_response('User already exists. Please Log in.', 202)
 
 
 @app.after_request
@@ -48,6 +201,7 @@ def get_recipes():
 
     return jsonify(json.loads(res))
 
+
 @app.route("/recipes-search", methods=["POST"])
 def filter_recipes():
     global cur
@@ -60,12 +214,11 @@ def filter_recipes():
         times = times['loadMore']
     start = 0 + (20 * times)
     rows = 20
-    cur.execute(f"SELECT * FROM recipe WHERE recipe_name LIKE '%{search_val}%' LIMIT {start},{rows};")
+    cur.execute(
+        f"SELECT * FROM recipe WHERE recipe_name LIKE '%{search_val}%' LIMIT {start},{rows};")
     res = cur.fetchall()
-    
 
     res = json.dumps(res, cls=AggregatedDataEncoder)
-
 
     return jsonify(json.loads(res))
 
@@ -94,12 +247,13 @@ def get_recipe_details(id):
     return jsonify(json.loads(res))
 
 
-@app.route('/allergies',methods=['GET'])
+@app.route('/allergies', methods=['GET'])
 def get_allergies():
     cur.execute("SELECT * FROM allergy;")
     res = cur.fetchall()
 
     return jsonify(res)
+
 
 @app.route('/shopping-list/<id>', methods=['GET'])
 def get_shopping_list(id):
@@ -131,16 +285,6 @@ def get_user(id):
     cur = conn.cursor(dictionary=True)
 
     return jsonify(json.loads(json.dumps(res, default=str)))
-
-
-@app.route("/login", methods=["POST"])
-def login():
-    pass
-
-
-app.route("/signup", methods=["POST"])
-def signup():
-    pass
 
 
 @app.route("/mealplan/<uid>", methods=["GET"])

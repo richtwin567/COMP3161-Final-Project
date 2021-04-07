@@ -8,13 +8,13 @@ const API_ENDPOINT = "http://localhost:9090";
  * @param {*} e
  * @param {object} formState
  */
-export async function registerUser(formState, e=undefined) {
+export async function registerUser(formState, e = undefined) {
   // Prevent the form from refreshing the page
   e?.preventDefault();
 
-  const res = await axios.post(API_ENDPOINT +'/signup', formState)
+  const res = await axios.post(API_ENDPOINT + "/signup", formState);
 
-  if (res.status===200 || res.status===202){
+  if (res.status === 200 || res.status === 202) {
     return loginUser(formState);
   }
 
@@ -29,13 +29,13 @@ export async function registerUser(formState, e=undefined) {
  * @param {*} formState
  * @return {object} An object containing the JWT and user details
  */
-export async function loginUser(formState, e=undefined) {
+export async function loginUser(formState, e = undefined) {
   // Prevent the form from refreshing the page
   e?.preventDefault();
 
   // Destructure form's state object
   const { username, password } = formState;
-
+  console.log(formState);
   // Post request to log the user in
   try {
     const loginResponse = await axios.post(API_ENDPOINT + "/login", {
@@ -48,36 +48,19 @@ export async function loginUser(formState, e=undefined) {
     const userData = loginResponse.data.user;
 
     // Store the JWT token
-    localStorage.setItem("auth-token", loginResponse.data.authToken);
-    return {
+    localStorage.setItem("auth-token", token);
+
+    const userObj = {
       token: token,
       user: userData,
     };
+
+    return userObj;
   } catch (err) {
-    console.log(err.response.data.msg);
+    console.log(err);
     return {
       error: "Failed to authenticate user",
     };
-  }
-}
-
-/**
- * Checks if the JWT is still valid
- * @return {object} If the token is valid
- * @return {JSXElement} The user is redirected if the token is invalid
- */
-async function checkToken(token) {
-  // Check if the token stored is valid
-  let tokenResponse = {};
-  try {
-    tokenResponse = await axios.post(API_ENDPOINT + "/checkToken", null, {
-      headers: { "x-access-token": token },
-    });
-    return tokenResponse;
-  } catch (error) {
-    // If the token is invalid the user is redirected to the auth page
-    localStorage.setItem("auth-token", "");
-    return <Redirect to="/auth"></Redirect>;
   }
 }
 
@@ -94,25 +77,8 @@ export async function checkLoggedIn(setUserData) {
     token = "";
   }
 
-  const tokenResponse = await checkToken(token);
-
-  // Retrieve user if the token is valid
-  let userResponse = {};
-  try {
-    if (tokenResponse.data.isValidToken) {
-      userResponse = await axios.get(API_ENDPOINT + "/user", {
-        headers: { "x-access-token": token },
-      });
-    } else {
-      localStorage.setItem("auth-token", "");
-    }
-  } catch (err) {
-    localStorage.setItem("auth-token", "");
-  }
-
   // Set the state of the user context to have the token and user
   setUserData({
     token: token,
-    user: userResponse.data,
   });
 }
