@@ -49,6 +49,11 @@ button {
   color: var(--on-dark);
 }
 
+.btn.filled.accent{
+  background-color: var(--accent);
+  color: var(--on-dark);
+}
+
 .btn.outline.primary {
   color: var(--on-light);
   background-color: var(--bg);

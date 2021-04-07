@@ -3,12 +3,14 @@ import { Link } from "react-router-dom";
 import "./SideBar.css";
 
 export default function SideBar(props) {
+
+	console.log(props);
 	const links = [
 		{ path: "recipes", label: "Recipes" },
 		{ path: "profile", label: "My Profile" },
 		{ path: "my-plan", label: "My Meal Plan" },
 		{ path: "plan-generator", label: "Meal Plan Generator" },
-		{ path: "shopping-list/3", label: "Shopping List" },
+		{ path: `shopping-list/${props.user?.id}`, label: "Shopping List" },
 		{ path: "logout", label: "Logout" },
 	];
 
@@ -31,7 +33,7 @@ export default function SideBar(props) {
 		<div id="side-bar">
 			<div className="section">
 				<h1>
-					Hi, {props.user.first_name + " " + props.user.last_name}
+					Hi, {props.user?.first_name + " " + props.user?.last_name}
 				</h1>
 				<Link
 					className="btn"

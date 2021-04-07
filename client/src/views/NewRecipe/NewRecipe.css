@@ -1,0 +1,36 @@
+#new-recipe {
+    padding:1rem 1.5rem;
+display: grid;
+height: 100%;
+width: 100%;
+grid-template-columns: 100%;
+grid-template-rows: max-content minmax(0,1fr) ;
+
+}
+
+#new-recipe .input-group{
+    display: flex;
+    flex-direction: column;
+}
+
+#new-recipe .ing-input{
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: auto auto;
+}
+
+#new-recipe .recipe-form{
+    display: grid;
+    grid-template-columns: 100%;
+    grid-template-rows: auto;
+    grid-auto-rows: auto;
+    gap: 1rem;
+    overflow: auto;
+    height: 100%;
+}
+
+#new-recipe ol, #new-recipe ol li{
+    list-style-type: decimal;
+    padding: 1rem;
+    float: left;
+}

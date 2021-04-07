@@ -56,7 +56,7 @@
   transition: 0.25s ease background-color;
 }
 
-.details p:hover {
+#menu-item-card .details p:hover {
   color: #1a75c0;
   font-weight: bold;
   cursor: pointer;

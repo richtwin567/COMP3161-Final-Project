@@ -12,15 +12,15 @@ function ProtectedRoute({ protectedComponent: Component, ...rest }) {
         let token = localStorage.getItem("auth-token");
         console.log(token);
         console.log(token);
-        if (token) {
+        //if (token) {
           return (
             <div>
               <MainLayout component={Component} />
             </div>
           );
-        } else {
-          return <Redirect to="/auth" />;
-        }
+        //} else {
+//return <Redirect to="/auth" />;
+        //}
       }}
     ></Route>
   );

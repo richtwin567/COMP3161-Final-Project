@@ -35,6 +35,7 @@ function ShoppingList() {
 	var totalNeeded = 0;
 	var totalInStock = 0;
 
+	console.log(shoppingList);
 	if (shoppingList.length) {
 		shoppingList.forEach((el) => {
 			totalNeeded += el.amount_needed;

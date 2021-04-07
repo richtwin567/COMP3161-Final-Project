@@ -13,42 +13,36 @@ function SearchRecipe() {
 	const history = useHistory();
 	const { searchVal } = useContext(SearchContext);
 
-	const getRecipes = useCallback(
-		async (shouldClear) => {
-			fetch(
-				`http://localhost:9090/recipes-search?recipe_name=${searchVal}`,
-				{
-					method: "POST",
-					headers: {
-						"Content-Type": "application/json",
-					},
-					body: JSON.stringify({ loadMore: loadMore }),
+	async function getRecipes(shouldClear) {
+		fetch(`http://localhost:9090/recipes-search?recipe_name=${searchVal}`, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify({ loadMore: loadMore }),
+		})
+			.then((res) => {
+				console.log(res);
+				if (res.status === 200) {
+					return res.json();
+				} else {
+					setMessage("Something went wrong :(");
+					res.json()
+						.then((err) => {
+							throw Error(err.message);
+						})
+						.catch((e) => console.error(e));
 				}
+			})
+			.then((data) =>
+				data.length
+					? shouldClear
+						? setRecipes(data)
+						: setRecipes((prev) => prev.concat(data))
+					: setMessage("No results found")
 			)
-				.then((res) => {
-					console.log(res);
-					if (res.status === 200) {
-						return res.json();
-					} else {
-						setMessage("Something went wrong :(");
-						res.json()
-							.then((err) => {
-								throw Error(err.message);
-							})
-							.catch((e) => console.error(e));
-					}
-				})
-				.then((data) =>
-					data.length
-						? shouldClear
-							? setRecipes(data)
-							: setRecipes((prev) => prev.concat(data))
-						: setMessage("No results found")
-				)
-				.catch((e) => console.log(e));
-		},
-		[loadMore, searchVal]
-	);
+			.catch((e) => console.log(e));
+	}
 
 	useEffect(() => {
 		let isMounted = true;
@@ -60,7 +54,7 @@ function SearchRecipe() {
 		return () => {
 			isMounted = false;
 		};
-	}, [getRecipes, loadMore]);
+	}, [loadMore]);
 
 	useEffect(() => {
 		let isMounted = true;
@@ -73,7 +67,7 @@ function SearchRecipe() {
 		return () => {
 			isMounted = false;
 		};
-	}, [getRecipes, searchVal]);
+	}, [searchVal]);
 
 	var recipeList = [];
 	if (recipes.length) {

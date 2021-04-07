@@ -1653,13 +1653,15 @@ procedures = []
 
 # procedure to insert recipe and retreive inserted record id
 procedures.append(create_procedure("insert_recipe", """
-    INSERT INTO recipe(image_url, prep_time, cook_time,  creation_date, culture, description, created_by)
-    VALUES (new_image_url, new_prep_time, new_cook_time, new_creation_date, new_culture, new_description, new_created_by);
+    INSERT INTO recipe(recipe_name, image_url, prep_time, cook_time,  creation_date, culture, description, created_by)
+    VALUES (new_name,new_image_url, new_prep_time, new_cook_time, new_creation_date, new_culture, new_description, new_created_by);
     SET new_id = LAST_INSERT_ID();
     """,
                                    [
                                        parameter(Direction.IN,
-                                                 "mew_image_url", string()),
+                                                 "new_name", string()),
+                                       parameter(Direction.IN,
+                                                 "new_image_url", string()),
                                        parameter(Direction.IN,
                                                  "new_prep_time", sql_time()),
                                        parameter(Direction.IN,
@@ -1800,7 +1802,7 @@ procedures.append(create_procedure("get_one_user", """
 
 procedures.append(create_procedure("get_user_by_login", """
 SELECT * FROM user
-WHERE username=uname AND pass=password;
+WHERE username=uname AND password=pass;
 """, [
     parameter(Direction.IN, 'uname', string()),
     parameter(Direction.IN, 'pass', string())

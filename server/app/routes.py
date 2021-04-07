@@ -1,5 +1,5 @@
+from functools import wraps
 from flask.globals import request
-from flask.json import JSONEncoder
 from mysql.connector import connect
 from . import app, conn, cur
 from flask import jsonify, make_response, abort
@@ -306,6 +306,7 @@ def get_measurements():
 
     return jsonify(res)
 
+
 @app.route('/ingredients', methods=["GET"])
 def get_ingredients():
     global cur
@@ -319,6 +320,34 @@ def get_ingredients():
     cur = conn.cursor(dictionary=True)
 
     return jsonify(res)
+
+
+@app.route('/new-recipe', methods=["POST"])
+def add_recipe():
+    req = request.get_json(force=True)
+
+    print(req)
+    cur.execute(
+        f"""CALL insert_recipe('{req['recipeName']}', '{req['recipeImg']}', '{req['recipePrepTime']}', '{req['recipeCookTime']}','{datetime.now().date()}','{req['recipeCulture']}','{req['recipeDescription']}', 1, @rid);""")
+    conn.commit()
+    cur.execute("SELECT @rid;")
+    res = cur.fetchone()
+    print(res)
+
+    new_id = res['@rid']
+    instructions = req['recipeInstructions']
+    for i in range(1,len(instructions)+1):
+        cur.execute(f"INSERT INTO instruction (step_number, instruction_details, recipe_id) VALUES ({i}, '{instructions[i-1]}', {new_id});")
+
+    ings = req["recipeIngredients"]
+    for ing in ings:
+        cur.execute(f"INSERT INTO recipe_ingredient_measurement(recipe_id, ingredient_id, measurement_id, amount) VALUES ({new_id}, {ing['ingredient_id']}, {ing['measurement_id']}, {ing['amount']});")
+
+    conn.commit()
+
+    path={"path": f"/app/recipes/details/{new_id}"}
+
+    return jsonify(path)
 
 @app.errorhandler(HTTPException)
 def json_http_errors(err):
