@@ -224,8 +224,8 @@ def get_meal_plan():
     res = json.dumps(res, cls=AggregatedDataEncoder)
     return jsonify(json.loads(res))
 
-@app.route("/meal-plan/new", methods=["POST"])
-def add_meal_plan():
+@app.route("/meal-plan/new/<uid>", methods=["POST"])
+def add_meal_plan(uid):
 
     global conn
     global cur
@@ -233,7 +233,7 @@ def add_meal_plan():
     req = request.get_json(force=True, silent=True)
     mealPlan = req.get('mealPlan')
     try:
-        cur.execute(f"DELETE p FROM planned_meal p JOIN meal_plan m ON p.plan_id = m.plan_id where m.for_user = 1;")
+        cur.execute(f"DELETE p FROM planned_meal p JOIN meal_plan m ON p.plan_id = m.plan_id where m.for_user = {uid};")
     finally:
         conn.commit() 
 

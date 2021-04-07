@@ -3,12 +3,10 @@ import "./PlanGenerator.css";
 
 function PlanGenerator({ onClick }) {
   const [selected, setSelected] = useState(false);
-  const [breakfast, setBreakfast] = useState(0);
-  const [lunch, setLunch] = useState(0);
-  const [dinner, setDinner] = useState(0);
 
   const addNewPlan = async (mealPlan) => {
-    await fetch("http://localhost:9090/meal-plan/new", {
+    let ran = Math.floor(Math.random() * 2000);
+    await fetch(`http://localhost:9090/meal-plan/new/${ran}`, {
       method: "POST",
       body: JSON.stringify({
         mealPlan: mealPlan,
@@ -65,25 +63,9 @@ function PlanGenerator({ onClick }) {
       </button>
       <div className={`show-details ${selected ? "" : "not-selected"}`}>
         <form onSubmit={(e) => generatePlan(e)}>
-          <input
-            type="number"
-            step="1"
-            value={breakfast}
-            onChange={(e) => setBreakfast(e.target.value)}
-          />
-          <input
-            type="number"
-            step="1"
-            value={lunch}
-            onChange={(e) => setLunch(e.target.value)}
-          />
-          <input
-            type="number"
-            step="1"
-            value={dinner}
-            onChange={(e) => setDinner(e.target.value)}
-          />
-          <input type="submit" value="Generate" />
+          <button className="btn generator-btn" type="submit">
+            Generate
+          </button>
           <p
             onClick={() => {
               setSelected(false);
