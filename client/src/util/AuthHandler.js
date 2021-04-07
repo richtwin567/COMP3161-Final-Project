@@ -48,7 +48,7 @@ export async function loginUser(formState, e = undefined) {
     const userData = loginResponse.data.user;
 
     // Store the JWT token
-    localStorage.setItem("auth-token", token);
+    sessionStorage.setItem("auth-token", token);
 
     const userObj = {
       token: token,
@@ -57,7 +57,6 @@ export async function loginUser(formState, e = undefined) {
 
     return userObj;
   } catch (err) {
-    console.log(err);
     return {
       error: "Failed to authenticate user",
     };
@@ -69,11 +68,11 @@ export async function loginUser(formState, e = undefined) {
  * @param {function} setUserData
  */
 export async function checkLoggedIn(setUserData) {
-  let token = localStorage.getItem("auth-token");
+  let token = sessionStorage.getItem("auth-token");
 
   // If no token is found, the token is set to an empty string
   if (token === null) {
-    localStorage.setItem("auth-token", "");
+    sessionStorage.setItem("auth-token", "");
     token = "";
   }
 
@@ -81,4 +80,14 @@ export async function checkLoggedIn(setUserData) {
   setUserData({
     token: token,
   });
+}
+
+export function logout(setUserData) {
+  sessionStorage.setItem("auth-token", "");
+  setUserData({
+    token: "",
+    user: {},
+  });
+
+  return <Redirect to="/auth" />;
 }
