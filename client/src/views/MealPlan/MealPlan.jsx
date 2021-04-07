@@ -9,6 +9,7 @@ import {
 } from "./MealPlanComponents";
 
 export default function MealPlan() {
+  let ran = Math.floor(Math.random() * 2000);
   const [ingredientsInfo, setIngredientsInfo] = useState({
     breakfast: 0,
     lunch: 0,
@@ -34,7 +35,7 @@ export default function MealPlan() {
   };
 
   const getMealPlans = async () => {
-    let res = await fetch("http://localhost:9090/meal-plan");
+    let res = await fetch(`http://localhost:9090/meal-plan/${ran}`);
     let data = await res.json();
     console.log(data);
     setMealPlans(data);
@@ -125,7 +126,7 @@ export default function MealPlan() {
             mealsPrepared="3"
             totalMeals="5"
           /> */}
-          <PlanGenerator />
+          <PlanGenerator ran={ran} />
         </section>
       </main>
     </div>
