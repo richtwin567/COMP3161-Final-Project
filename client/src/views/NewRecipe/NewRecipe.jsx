@@ -1,4 +1,5 @@
 import "./NewRecipe.css";
+<<<<<<< HEAD
 import React, { useReducer, useState, useEffect } from "react";
 import Spinner from "../../components/Spinner/Spinner";
 import { useHistory} from "react-router";
@@ -380,8 +381,40 @@ function NewRecipe() {
 			) : (
 				<Spinner />
 			)}
+=======
+import React, {useReducer} from "react";
+
+function reducer(params) {
+    
+}
+
+function NewRecipe() {
+
+    const [formState, updateFormState] = useReducer(reducer, {
+        recipeName:'',
+        recipeDescription:'',
+        recipeCulture:'',
+        recipeIngredients:[],
+        recipeInstructions:[]
+    })
+
+	return (
+		<div id="new-recipe">
+			<h1>Add Recipe</h1>
+			<form>
+				<input type="text" id="recipe-name"/>
+				<input type="text" id="recipe-desc"/>
+				<input type="text" id="recipe-culture"/>
+				<input type="text" />
+				<input type="text" />
+			</form>
+>>>>>>> merging-rojae
 		</div>
 	);
 }
 
+<<<<<<< HEAD
 export default NewRecipe;
+=======
+export default NewRecipe;
+>>>>>>> merging-rojae

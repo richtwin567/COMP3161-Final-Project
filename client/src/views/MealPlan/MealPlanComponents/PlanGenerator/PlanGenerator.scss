@@ -1,0 +1,25 @@
+#plan-generator {
+  /* Rectangle 85 */
+  margin: 20px 0px;
+  background: #ffffff;
+  border: 2px solid #1e88e5;
+  box-sizing: border-box;
+  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+  border-radius: 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 30px;
+  text-align: center;
+
+  .not-selected {
+    display: none;
+  }
+}
+
+#plan-generator button {
+  font-size: 0.8em;
+  margin-top: 20px;
+  border-radius: 15px;
+}

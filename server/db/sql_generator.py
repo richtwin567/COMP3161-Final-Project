@@ -1802,7 +1802,11 @@ procedures.append(create_procedure("get_one_user", """
 
 procedures.append(create_procedure("get_user_by_login", """
 SELECT * FROM user
+<<<<<<< HEAD
 WHERE username=uname AND password=pass;
+=======
+WHERE username=uname AND pass=password;
+>>>>>>> merging-rojae
 """, [
     parameter(Direction.IN, 'uname', string()),
     parameter(Direction.IN, 'pass', string())

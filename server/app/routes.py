@@ -201,6 +201,75 @@ def get_recipes():
 
     return jsonify(json.loads(res))
 
+<<<<<<< HEAD
+=======
+@app.route("/ingredients")
+def get_ingredients():
+    cur.execute(f"SELECT * FROM ingredient;")
+    res = cur.fetchall()
+    res = json.dumps(res)
+
+    return jsonify(json.loads(res))
+
+@app.route("/measurements")
+def get_measurements():
+    cur.execute(f"SELECT * FROM measurement;")
+    res = cur.fetchall()
+    res = json.dumps(res)
+
+    return jsonify(json.loads(res))
+
+@app.route("/meal-plan")
+def get_meal_plan():
+    cur.execute(f"SELECT * FROM meal_plan m join planned_meal p on m.plan_id = p.plan_id join recipe r on r.recipe_id = p.recipe_id where m.for_user = 1;")
+    res = cur.fetchall()
+    res = json.dumps(res, cls=AggregatedDataEncoder)
+    return jsonify(json.loads(res))
+
+@app.route("/meal-plan/new/<uid>", methods=["POST"])
+def add_meal_plan(uid):
+
+    global conn
+    global cur
+
+    req = request.get_json(force=True, silent=True)
+    mealPlan = req.get('mealPlan')
+    try:
+        cur.execute(f"DELETE p FROM planned_meal p JOIN meal_plan m ON p.plan_id = m.plan_id where m.for_user = {uid};")
+    finally:
+        conn.commit() 
+
+    conn = connect(**app.config.get("DB_CONN_INFO"))
+    cur = conn.cursor(dictionary=True)
+    for i in mealPlan:
+        tod = i['time_of_day']
+        serving_size = i['serving_size']
+        rid = i['recipe_id']
+        try:
+            cur.execute(f"INSERT INTO planned_meal (time_of_day, serving_size, recipe_id, plan_id) values('{tod}', {serving_size}, {rid}, 1);")
+        finally:
+            conn.commit() 
+
+        conn = connect(**app.config.get("DB_CONN_INFO"))
+        cur = conn.cursor(dictionary=True)
+    
+    return jsonify(1)
+
+@app.route("/get-recipes")
+def get_recipes_by_user():
+    cur.execute(f"SELECT * FROM recipe where created_by = 1;")
+    res = cur.fetchall()
+    res = json.dumps(res, cls=AggregatedDataEncoder)
+    return jsonify(json.loads(res))
+
+@app.route("/ingredients-filter/<rid>")
+def get_ingredients_per_recipe(rid):
+    recipe_id = int(rid)
+    cur.execute(f"SELECT * FROM ingredient_measurement_joined where recipe_id = {recipe_id}")
+    res = cur.fetchall()
+    res = json.dumps(res)
+    return jsonify(json.loads(res))
+>>>>>>> merging-rojae
 
 @app.route("/recipes-search", methods=["POST"])
 def filter_recipes():
@@ -287,6 +356,7 @@ def get_user(id):
     return jsonify(json.loads(json.dumps(res, default=str)))
 
 
+<<<<<<< HEAD
 @app.route("/mealplan/<uid>", methods=["GET"])
 def get_meal_plan(uid):
     pass
@@ -349,6 +419,8 @@ def add_recipe():
 
     return jsonify(path)
 
+=======
+>>>>>>> merging-rojae
 @app.errorhandler(HTTPException)
 def json_http_errors(err):
     """
