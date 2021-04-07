@@ -1,6 +1,10 @@
-import React from "react";
+import React, { useContext } from "react";
 import { Switch, Route, Redirect, BrowserRouter } from "react-router-dom";
 import { ProtectedRoute } from "components/routes";
+
+import { logout } from "util/AuthHandler";
+
+import { UserContext } from "context/UserContext";
 
 import {
   Auth,
@@ -70,6 +74,7 @@ function RouteClient() {
 
         <Route exact path="/app/logout">
           {localStorage.setItem("auth-token", "")}
+          {localStorage.setItem("user", "")}
           <Redirect to="/auth" />
         </Route>
         <Route exact path="/app">

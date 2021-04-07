@@ -14,8 +14,9 @@ function UserProvider({ children }) {
   });
 
   useEffect(() => {
-    checkLoggedIn(setUserData);
-  }, []);
+    sessionStorage.setItem("auth-token", JSON.stringify(userData.token));
+    sessionStorage.setItem("user", JSON.stringify(userData.user));
+  }, [userData]);
 
   return (
     <UserContext.Provider value={{ userData, setUserData }}>
