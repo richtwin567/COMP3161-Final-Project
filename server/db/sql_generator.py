@@ -533,7 +533,8 @@ def random_time():
 
 
 # Functions to generate the insert statements
-CAP =100000
+CAP = 100000
+
 
 def generate_recipe_data(no_entries, no_users, faker_obj):
     """Creates the INSERT queries for the Recipe table
@@ -545,7 +546,7 @@ def generate_recipe_data(no_entries, no_users, faker_obj):
         A list containing all of the insert statements
     """
     value_lists = []
-    batch =[]
+    batch = []
     for value in range(no_entries):
 
         # Retrieve and format the current date
@@ -571,12 +572,11 @@ def generate_recipe_data(no_entries, no_users, faker_obj):
 
         value_lists.append(recipe_lst)
 
-        if len(value_lists)%CAP==0:
+        if len(value_lists) % CAP == 0:
             insert_statement = insert_all('recipe', value_lists)
-            value_lists=[]
+            value_lists = []
             batch.append(insert_statement)
 
-        
     if value_lists:
         insert_statement = insert_all('recipe', value_lists)
         batch.append(insert_statement)
@@ -609,14 +609,14 @@ def generate_user_data(no_entries, faker_obj):
         value_lst = [user_id, username, first_name, last_name, password]
         value_lists.append(value_lst)
 
-        if len(value_lists)%CAP==0:
+        if len(value_lists) % CAP == 0:
             insert_statement = insert_all("user", value_lists)
-            value_lists=[]
+            value_lists = []
             batch.append(insert_statement)
 
     if value_lists:
         insert_statement = insert_all("user", value_lists)
-        value_lists=[]
+        value_lists = []
         batch.append(insert_statement)
 
     return batch
@@ -632,7 +632,7 @@ def generate_ingredients_data():
         (string) A list containing the insert statement
     """
     value_lists = []
-    batch=[]
+    batch = []
     for value in range(len(INGREDIENTS)):
 
         # Pull from the ingredients array
@@ -646,14 +646,14 @@ def generate_ingredients_data():
 
         value_lists.append(ingredient_data)
 
-        if len(value_lists)%CAP==0:
+        if len(value_lists) % CAP == 0:
             insert_statement = insert_all("ingredient", value_lists)
-            value_lists=[]
+            value_lists = []
             batch.append(insert_statement)
 
     if value_lists:
         insert_statement = insert_all("ingredient", value_lists)
-        value_lists=[]
+        value_lists = []
         batch.append(insert_statement)
 
     return batch
@@ -680,14 +680,14 @@ def generate_allergies_data():
         allergy_data = [allergy_id, allergy_name]
         value_lists.append(allergy_data)
 
-        if len(value_lists)%CAP==0:
+        if len(value_lists) % CAP == 0:
             insert_statement = insert_all("allergy", value_lists)
-            value_lists=[]
+            value_lists = []
             batch.append(insert_statement)
 
     if value_lists:
         insert_statement = insert_all("allergy", value_lists)
-        value_lists=[]
+        value_lists = []
         batch.append(insert_statement)
 
     return batch
@@ -705,7 +705,7 @@ def generate_ingredient_allergies():
     # Initializing key variables
     value_lists = []
     no_allergies = len(ALLERGIES)
-    batch=[]
+    batch = []
     for value in range(1, len(INGREDIENTS)+1):
 
         # Randomly assign allergies
@@ -716,14 +716,14 @@ def generate_ingredient_allergies():
         allergy_data = [allergy_id, ingredient_id]
         value_lists.append(allergy_data)
 
-        if len(value_lists)%CAP==0:
+        if len(value_lists) % CAP == 0:
             insert_statement = insert_all("ingredient_allergy", value_lists)
-            value_lists=[]
+            value_lists = []
             batch.append(insert_statement)
-    
+
     if value_lists:
         insert_statement = insert_all("ingredient_allergy", value_lists)
-        value_lists=[]
+        value_lists = []
         batch.append(insert_statement)
 
     return batch
@@ -741,7 +741,7 @@ def generate_user_allergies(no_users):
     # Initializing key variables
     value_lists = []
     no_allergies = len(ALLERGIES)
-    batch=[]
+    batch = []
 
     # Assuming half of the users have allergies
     user_ids = list(range(1, (no_users//2)+1))
@@ -757,14 +757,14 @@ def generate_user_allergies(no_users):
         allergy_data = [user_id, allergy_id]
         value_lists.append(allergy_data)
 
-        if(len(value_lists)%CAP==0):
+        if(len(value_lists) % CAP == 0):
             insert_statement = insert_all("user_allergy", value_lists)
-            value_lists=[]
+            value_lists = []
             batch.append(insert_statement)
 
     if value_lists:
         insert_statement = insert_all("user_allergy", value_lists)
-        value_lists=[]
+        value_lists = []
         batch.append(insert_statement)
 
     return batch
@@ -781,7 +781,7 @@ def generate_measurment_inserts():
     """
     # Initializing key variables
     value_lists = []
-    batch=[]
+    batch = []
     for value in range(1, len(UNITS)+1):
 
         # Randomly generate measurement values
@@ -793,14 +793,14 @@ def generate_measurment_inserts():
         measurement_data = [measurement_id, unit]
         value_lists.append(measurement_data)
 
-        if(len(value_lists)%CAP==0):
+        if(len(value_lists) % CAP == 0):
             insert_statement = insert_all("measurement", value_lists)
-            value_lists=[]
+            value_lists = []
             batch.append(insert_statement)
-    
+
     if value_lists:
         insert_statement = insert_all("measurement", value_lists)
-        value_lists=[]
+        value_lists = []
         batch.append(insert_statement)
 
     return batch
@@ -821,7 +821,7 @@ def generate_in_stock_data(no_users):
     """
     # Initializing key variables
     value_lists = []
-    batch= []
+    batch = []
     no_ingredients = len(INGREDIENTS)
     for user_id in range(1, no_users+1):
         for ingredient_id in range(1, no_ingredients):
@@ -831,14 +831,14 @@ def generate_in_stock_data(no_users):
             stock_data = [user_id, ingredient_id, ingredient_amt]
             value_lists.append(stock_data)
 
-            if len(value_lists)%CAP==0:
+            if len(value_lists) % CAP == 0:
                 insert_statement = insert_all("in_stock", value_lists)
-                value_lists=[]
+                value_lists = []
                 batch.append(insert_statement)
 
     if value_lists:
         insert_statement = insert_all("in_stock", value_lists)
-        value_lists=[]
+        value_lists = []
         batch.append(insert_statement)
 
     return batch
@@ -855,7 +855,7 @@ def generate_instruction_data(faker_obj, no_recipes):
     """
     # Initializing key variables
     value_lists = []
-    batch=[]
+    batch = []
     instruction_id = 1
     for recipe in range(1, no_recipes+1):
         recipe_id = random.randint(1, no_recipes)
@@ -872,14 +872,14 @@ def generate_instruction_data(faker_obj, no_recipes):
             instruction_id += 1
             value_lists.append(instruction_data)
 
-            if(len(value_lists)%CAP==0):
+            if(len(value_lists) % CAP == 0):
                 insert_statement = insert_all("instruction", value_lists)
-                value_lists=[]
+                value_lists = []
                 batch.append(insert_statement)
 
     if value_lists:
         insert_statement = insert_all("instruction", value_lists)
-        value_lists=[]
+        value_lists = []
         batch.append(insert_statement)
 
     return batch
@@ -901,7 +901,7 @@ def generate_recipe_measurement(no_recipes, faker_obj):
     no_ing = len(INGREDIENTS)
     no_measurements = len(UNITS)
     value_lists = []
-    batch=[]
+    batch = []
     for rid in range(1, no_recipes+1):
         no_items = random.randint(1, 7)
         for _ in range(no_items):
@@ -911,18 +911,20 @@ def generate_recipe_measurement(no_recipes, faker_obj):
             values = [rid, ing_id, m_id, amount]
             value_lists.append(values)
 
-            if(len(value_lists)%CAP==0):
-                insert_statement = insert_all("recipe_ingredient_measurement", value_lists)
-                value_lists=[]
+            if(len(value_lists) % CAP == 0):
+                insert_statement = insert_all(
+                    "recipe_ingredient_measurement", value_lists)
+                value_lists = []
                 batch.append(insert_statement)
-        
+
         faker_obj.unique.clear()
 
     if value_lists:
-        insert_statement = insert_all("recipe_ingredient_measurement", value_lists)
-        value_lists=[]
+        insert_statement = insert_all(
+            "recipe_ingredient_measurement", value_lists)
+        value_lists = []
         batch.append(insert_statement)
-    
+
     return batch
 
 
@@ -939,18 +941,18 @@ def generate_meal_plans(no_users):
     """
 
     value_lists = []
-    batch=[]
+    batch = []
     for id in range(1, no_users+1):
         value_lists.append([id, id])
 
-        if len(value_lists)%CAP==0:
+        if len(value_lists) % CAP == 0:
             insert_statement = insert_all("meal_plan", value_lists)
-            value_lists=[]
+            value_lists = []
             batch.append(insert_statement)
 
     if value_lists:
         insert_statement = insert_all("meal_plan", value_lists)
-        value_lists=[]
+        value_lists = []
         batch.append(insert_statement)
 
     return batch
@@ -983,14 +985,14 @@ def generate_planned_meals(no_users, no_recipes):
                 meal_id += 1
                 value_lists.append(values)
 
-                if len(value_lists)%CAP==0:
+                if len(value_lists) % CAP == 0:
                     insert_statement = insert_all("planned_meal", value_lists)
-                    value_lists=[]
+                    value_lists = []
                     batch.append(insert_statement)
 
     if value_lists:
         insert_statement = insert_all("planned_meal", value_lists)
-        value_lists=[]
+        value_lists = []
         batch.append(insert_statement)
 
     return batch
@@ -1217,6 +1219,7 @@ SELECT
     jua.allergy_name,
     u.username,
     u.first_name,
+    u.password,
     u.last_name
 FROM
     user u
@@ -1240,6 +1243,7 @@ SELECT
     u.username,
     u.first_name,
     u.last_name,
+    u.password,
     JSON_ARRAYAGG(
         JSON_OBJECT(
             'allergy_id',
@@ -1770,7 +1774,7 @@ procedures.append(create_procedure("get_user_shopping_list", """
             FROM
                 `in_stock` ist
             WHERE
-                ist.user_id=usid
+                ist.user_id=uid
         ) s
     ON
         i.ingredient_id = s.ingredient_id
@@ -1794,7 +1798,14 @@ procedures.append(create_procedure("get_one_user", """
                                                  "uid", integer())
                                    ]))
 
-procedures.append(create_procedure("get_recipe_detail","""
+procedures.append(create_procedure("get_user_by_login", """
+SELECT * FROM user_allergy_joined_agg WHERE username=uname AND pass=password;
+""", [
+    parameter(Direction.IN, 'uname', string()),
+    parameter(Direction.IN, 'pass', string())
+]))
+
+procedures.append(create_procedure("get_recipe_detail", """
     SELECT 
         ri.recipe_id,
         ri.recipe_name,
@@ -1852,9 +1863,10 @@ procedures.append(create_procedure("get_recipe_detail","""
         ON ri.recipe_id=rimj.recipe_id
         GROUP BY ri.recipe_id;
     """,
-    [
-        parameter(Direction.IN, "rid", integer())
-    ]))
+                                   [
+                                       parameter(Direction.IN,
+                                                 "rid", integer())
+                                   ]))
 
 
 ##### END DB CREATION #####
@@ -1876,7 +1888,6 @@ def print_done(msg):
         print("\033[2K\033[32m\u2713\033[0m "+msg)
     except UnicodeEncodeError:
         print("\033[2K"+msg)
-
 
 
 def format_time_elapsed(ttime: timedelta):
