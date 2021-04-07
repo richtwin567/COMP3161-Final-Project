@@ -164,7 +164,8 @@ def signup():
     if user_data is None:
 
         cur.execute(
-            f"CALL insert_user('{username}', '{first_name}', '{last_name}', '{password}')")
+            f"CALL insert_user('{username}', '{first_name}', '{last_name}', '{password}', @user_id)")
+
         return make_response('Successfully registered.', 201)
     else:
         return make_response('User already exists. Please Log in.', 202)

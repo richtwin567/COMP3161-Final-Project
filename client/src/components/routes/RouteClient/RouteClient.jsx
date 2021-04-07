@@ -1,7 +1,5 @@
 import React from "react";
 import { Switch, Route, Redirect, BrowserRouter } from "react-router-dom";
-
-import { MainLayout } from "components";
 import { ProtectedRoute } from "components/routes";
 
 import {
